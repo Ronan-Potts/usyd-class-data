@@ -1,0 +1,142 @@
+---
+title: "Assignment"
+format:
+  html:
+    self-contained: true
+    code-fold: show
+    code-tools: true
+    code-line-numbers: true
+    df-print: paged
+table-of-contents: true
+number-sections: true
+editor: visual
+---
+
+# Introduction
+
+The DATA2x02 survey contains 38 questions addressed to DATA2x02 students at the University of Sydney. Of the 780 students in DATA2002 and 70 students in DATA2902, responses were disproportionally recorded from 165 DATA2002 students and 40 DATA2902 students.
+
+Participants found the survey on the DATA2x02 edstem page, and the survey was advertised on the DATA2x02 edstem page as well as in the DATA2x02 lectures.
+
+The sampling was a mixture of two types of sampling:
+
+-   **Convenience sampling:** sampling via convenient sources for data. The survey sampling was convenient as it was performed via google forms and advertised through edstem and lectures.
+
+-   **Voluntary response sampling:** sampling made of up participants who have volunteered to participate.
+
+The sampling was by no means a random sample. Hence, many potential biases may arise. Some examples of biases include:
+
+-   **Self-selection / non-response bias.** These forms of bias refer to people with specific characteristics who are either more likely, or less likely, to participate in surveys. Because the survey used voluntary response sampling, these biases are likely to appear.
+
+    Some variables which are most likely to be subjected to this bias include:
+
+    -   **"Which unit are you enrolled in?"** as those who are proactive enough to participate are also likely proactive in their studies, or more motivated, meaning they are more likely to be in DATA2902.
+
+    -   **"What kind of role (active or passive) do you think you are when working as part of a team?** as those who are proactive enough to participate in the survey are also more likely to take on an active role in a team.
+
+    -   **"How much time do you usually spend on DATA2x02 each week?"** as individuals who spend more time in DATA2x02 will have allocated enough time to participate in the survey. Also, those who have spent zero hours in DATA2x02 so far will not have even noticed the survey.
+
+    -   **"Do you submit assignments on time"**. Those who are proactive enough to submit their response in the survey before it is due are also more likely to submit their assignments before they are due.
+
+    -   **"What is your WAM?"**. Students who respond to the survey probably spend more time on their course content and therefore likely perform better overall.
+
+    -   **"How many hours a week do you spend studying?"**. Students who spend zero hours a week studying will have probably not seen the survey. Students who spend more time per week studying are more active in their course work and therefore may be more likely to respond to the survey.
+
+-   **Undercoverage/advertising bias.** This bias occurs when a group of a population is inadequately represented in the sample. Because the survey used convenience sampling and was advertised via lectures, individuals who participate and are proactive in their studies are more likely to be represented in the survey.
+
+    Some variables which are most likely to be influenced by this bias include:
+
+    -   **All variables under "Self-selection / non-response bias"** for the same "proactivity" reasons.
+
+-   **Response bias.**
+
+A few questions could be improved upon to yield a better result.
+
+-   **"How often do you feel anxious on a daily basis"** change the scale from 0 to 10 to a different multiple-choice selection such as:
+
+    -   Never
+
+    -   Rarely
+
+    -   Sometimes
+
+    -   Often
+
+    -   Always
+
+    To generate a more objective result. The scale from 0 to 10 is very subjective and can be interpreted in different ways.
+
+-   **"What is your favourite social media platform"**. Change the text input into a select input. There is a lot of debate about what is a "real" social media platform. Anecdotally, many people seem to believe that the new social media phenomenon "BeReal" is not a social media platform (even those who use BeReal). By providing "BeReal", among others, asa clear option, responders will give more accurate data.
+
+-   **"On average, how many hours each week do you spend exercising?"**. Change the text input into a select input. This will prevent the need to clean the data by recognising inputs such as "four", "IV", and "4" as the same value.
+
+-   **"Have you ever tested positive to COVID-19?"**. Remove the "Other" option. The question asks for a yes/no answer.
+
+-   **"How much time do you usually spend on DATA2x02 each week?"**. Rather than allowing for text input, which accepts subjective answers such as "a lot", use a slider input from 0 hours to 168 hours (which encompasses all possible times).
+
+-   **"On average, how much are you able to save per week (in AUD)?"**. Similar to above. Use an input which only accepts integers (positive or negative).
+
+-   **"How many hours a week do you spend studying?"**. Same as above.
+
+-   **"How many hours do you spend on social media per day?"**. Same as above.
+
+-   **"If you were to spend two weeks travelling around Spain, how much would you budget towards spending each day (all inclusive: accomodation/activities/food/drink/entertainment)?"**. Same as above.
+
+-   **"How many hours a week (on average) do you work in paid employment?"**. Same as above.
+
+# Aim
+
+The aim of this report is to answer three questions:
+
+(1) *Do DATA2902 students achieve higher WAMs than DATA2002 students?*
+
+(2) Do DATA2902 students spend more hours studying per week than DATA2002 students?
+
+(3) Do DATA2902 students spend a different amount of time exercising than DATA2002 students?
+
+For results: Q1 answer is YES, so what other factors may be confounding these results?
+
+# Code
+
+## Importing Packages
+
+This report requires packages from the `tidyverse` library.
+
+```{r}
+library(tidyverse)
+```
+
+## Reading Data
+
+The data can be read using `readr::read_tsv()` from the `readr` package.
+
+```{r}
+#| code-fold: True
+df = readr::read_tsv("DATA2x02 survey (2022) - Form responses 1.tsv")
+df
+```
+
+```{r}
+#| echo: False
+#| output: False
+old_names = colnames(df)
+```
+
+```{r}
+#| echo: False
+#| output: False
+new_names = c("timestamp","covid_positive","living_arrangements","height","uni_travel_method","uni_travel_listen","spain_budget","feel_overseas","feel_anxious","study_hrs","read_news","study_load","work","lab_zoom","social_media","gender","sleep_time","wake_time","random_number","steak_preference","dominant_hand","normal_advanced","exercise_hrs","employment_hrs","city","weekly_saving","hourly_plan","weeks_behind","assignment_on_time","used_r_before","team_role","data2x02_hrs","social_media_hrs","uni_year","sport","wam","shoe_size","decade_selection")
+# overwrite the old names with the new names:
+colnames(df) = new_names
+# combine old and new into a data frame:
+name_combo = bind_cols(New = new_names, Old = old_names)
+name_combo %>% gt::gt()
+```
+
+# Results
+
+## Limitations of Investigation
+
+1.  *Do DATA2902 students achieve higher WAMs than DATA2002 students?*
+
+Issues: the DATA2002 students who responded are not representative of the entire DATA2002 cohort.
