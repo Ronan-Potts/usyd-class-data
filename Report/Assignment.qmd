@@ -103,6 +103,7 @@ For results: Q1 answer is YES, so what other factors may be confounding these re
 This report requires packages from the `tidyverse` library.
 
 ```{r}
+#| output: False
 library(tidyverse)
 ```
 
@@ -111,8 +112,14 @@ library(tidyverse)
 The data can be read using `readr::read_tsv()` from the `readr` package.
 
 ```{r}
-#| code-fold: True
-df = readr::read_tsv("./DATA2x02 survey (2022) - Form responses 1.tsv")
+#| output: False
+df = readr::read_tsv("../Data/DATA2x02 survey (2022) - Form responses 1.tsv")
+```
+
+and the raw paged output of `df` is:
+
+```{r}
+#| echo: False
 df
 ```
 
