@@ -112,7 +112,7 @@ The data can be read using `readr::read_tsv()` from the `readr` package.
 
 ```{r}
 #| code-fold: True
-df = readr::read_tsv("DATA2x02 survey (2022) - Form responses 1.tsv")
+df = readr::read_tsv("./DATA2x02 survey (2022) - Form responses 1.tsv")
 df
 ```
 
