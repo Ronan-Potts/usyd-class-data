@@ -17,85 +17,119 @@ number-sections: true # (Optional) Puts numbers next to heading/subheadings
 
 # Introduction
 
-The DATA2x02 survey contains 38 questions addressed to DATA2x02 students at the University of Sydney. Of the 780 students in DATA2002 and 70 students in DATA2902, responses were disproportionally recorded from 165 DATA2002 students and 40 DATA2902 students.
+This report analyses data from a survey addressed to students at the University of Sydney who take *Data Analytics: Learning from Data* (DATA2x02). The survey was run from 15 August 2022 to 23 August 2022 and contains 38 questions. Participants found the survey on the DATA2x02 edstem page, and the survey was advertised on the DATA2x02 edstem page as well as in the DATA2x02 lectures.
 
-Participants found the survey on the DATA2x02 edstem page, and the survey was advertised on the DATA2x02 edstem page as well as in the DATA2x02 lectures.
+```{r fig-usyd-quad, echo = FALSE, out.width= '100%', fig.cap = "University of Sydney's main quadrangle.", fig.show='hold', fig.align='center'}
+knitr::include_graphics("usyd-quadrangle.jpg")
+```
 
-The sampling was a mixture of two types of sampling:
+The cohort for DATA2x02 is split into advanced stream students who take [DATA2902](https://www.sydney.edu.au/units/DATA2902) and normal stream students who take [DATA2002](https://www.sydney.edu.au/units/DATA2002). Of the 780 students in DATA2002 and 70 students in DATA2902, responses were disproportionally recorded from 165 DATA2002 students and 40 DATA2902 students. After cleaning, responses are recorded from 120 DATA2002 students and 33 DATA2902 students.
+
+The survey sampling was a mixture of two types of sampling:
 
 -   **Convenience sampling:** sampling via convenient sources for data. The survey sampling was convenient as it was performed via google forms and advertised through edstem and lectures.
 
 -   **Voluntary response sampling:** sampling made of up participants who have volunteered to participate.
 
-The sampling was by no means a random sample. Hence, many potential biases may arise. Some examples of biases include:
+::: {.callout-caution collapse="false"}
+#### Bias in the DATA2x02 survey
 
--   **Self-selection / non-response bias.** These forms of bias refer to people with specific characteristics who are either more likely, or less likely, to participate in surveys. Because the survey used voluntary response sampling, these biases are likely to appear.
+The survey sampling was by no means a random sample. Hence, many potential biases may arise. Some examples of biases in the survey include:
 
-    Some variables which are most likely to be subjected to this bias include:
+**Self-selection / non-response bias.** These forms of bias refer to people with specific characteristics who are either more likely, or less likely, to participate in surveys. Because the survey used voluntary response sampling, these biases are likely to appear.
 
-    -   **"Which unit are you enrolled in?"** as those who are proactive enough to participate are also likely proactive in their studies, or more motivated, meaning they are more likely to be in DATA2902.
+Some variables which are most likely to be subjected to this bias include:
 
-    -   **"What kind of role (active or passive) do you think you are when working as part of a team?** as those who are proactive enough to participate in the survey are also more likely to take on an active role in a team.
+-   **"Which unit are you enrolled in?"** as those who are proactive enough to participate are also likely proactive in their studies, or more motivated, meaning they are more likely to be in DATA2902.
 
-    -   **"How much time do you usually spend on DATA2x02 each week?"** as individuals who spend more time in DATA2x02 will have allocated enough time to participate in the survey. Also, those who have spent zero hours in DATA2x02 so far will not have even noticed the survey.
+-   **"What kind of role (active or passive) do you think you are when working as part of a team?** as those who are proactive enough to participate in the survey are also more likely to take on an active role in a team.
 
-    -   **"Do you submit assignments on time"**. Those who are proactive enough to submit their response in the survey before it is due are also more likely to submit their assignments before they are due.
+-   **"How much time do you usually spend on DATA2x02 each week?"** as individuals who spend more time in DATA2x02 will have allocated enough time to participate in the survey. Also, those who have spent zero hours in DATA2x02 so far will not have even noticed the survey.
 
-    -   **"What is your WAM?"**. Students who respond to the survey probably spend more time on their course content and therefore likely perform better overall.
+-   **"Do you submit assignments on time"**. Those who are proactive enough to submit their response in the survey before it is due are also more likely to submit their assignments before they are due.
 
-    -   **"How many hours a week do you spend studying?"**. Students who spend zero hours a week studying will have probably not seen the survey. Students who spend more time per week studying are more active in their course work and therefore may be more likely to respond to the survey.
+-   **"What is your WAM?"**. Students who respond to the survey probably spend more time on their course content and therefore likely perform better overall.
 
--   **Undercoverage/advertising bias.** This bias occurs when a group of a population is inadequately represented in the sample. Because the survey used convenience sampling and was advertised via lectures, individuals who participate and are proactive in their studies are more likely to be represented in the survey.
+-   **"How many hours a week do you spend studying?"**. Students who spend zero hours a week studying will have probably not seen the survey. Students who spend more time per week studying are more active in their course work and therefore may be more likely to respond to the survey.
 
-    Some variables which are most likely to be influenced by this bias include:
+The questions above are also prone to **undercoverage/advertising bias.** This bias occurs when a subgroup of a population is inadequately represented in a sample. Because the survey used convenience sampling and was advertised via lectures, individuals who participate and are proactive in their studies are more likely to be represented in the survey than those who don't. This bias is clear in the disproportional representation of DATA2902 students over DATA2002 students in the survey results.
 
-    -   **All variables under "Self-selection / non-response bias"** for the same "proactivity" reasons.
+**Response bias.** This bias may occur when an individual feels pressured to give a certain response. Students who participated in the survey may have inflated some of their numbers to look "nicer".
 
--   **Response bias.** This bias may occur when an individual feels pressured to give a certain response. Students who participated in the survey may have inflated some of their numbers to look "nicer".
+Some variables which are most likely to be influenced by this bias include:
 
-    Some variables which are most likely to be influenced by this bias include:
+-   **"On average, how many hours each week do you spend exercising"**. Students may write down a larger number than they know to actually be true.
 
-    -   **"On average, how many hours each week do you spend exercising"**. Students may write down a larger number than they know to actually be true.
+-   **"In an average semester, how many weeks (on average, between all subjects) are you behind on lectures, labs and tutorials?"**. Students in denial may write down a smaller number than they know to actually be true.
 
-    -   **"In an average semester, how many weeks (on average, between all subjects) are you behind on lectures, labs and tutorials?"**. Students in denial may write down a smaller number than they know to actually be true.
+-   **"How tall are you?"**. Students (especially male students) may write down a larger number than their real height. This may also extend from measurement bias when students recorded their own heights independently.
 
-    -   **"How tall are you?"**. Students (especially male students) may write down a larger number than their real height. This may also extend from measurement bias when students recorded their own heights independently.
-
-    -   **"What is your WAM?"**. Students may write down a larger number than they know to actually be true.
+-   **"What is your WAM?"**. Students may write down a larger number than they know to actually be true.
+:::
 
 A few questions could be improved upon to yield a better result.
 
--   **"How often do you feel anxious on a daily basis"** change the scale from 0 to 10 to a different multiple-choice selection such as:
+::: {.callout-note icon="false"}
+## How often do you feel anxious on a daily basis?
 
-    -   Never
+Scales from 0 to 10 are quite open to interpretation. This question would be improved by changing the answer scale to to a different multiple-choice selection such as:
 
-    -   Rarely
+-   Never
 
-    -   Sometimes
+-   Rarely
 
-    -   Often
+-   Sometimes
 
-    -   Always
+-   Often
 
-    To generate a more objective result. The scale from 0 to 10 is very subjective and can be interpreted in different ways.
+-   Always
 
--   **"What is your favourite social media platform"**. Change the text input into a select input. There is a lot of debate about what is a "real" social media platform. Anecdotally, many people seem to believe that the new social media phenomenon "BeReal" is not a social media platform (even those who use BeReal). By providing "BeReal", among others, asa clear option, responders will give more accurate data.
+To generate a more objective result. The scale from 0 to 10 is mery subjective and can be interpreted in different ways.
+:::
 
--   **"On average, how many hours each week do you spend exercising?"**. Change the text input into a select input. This will prevent the need to clean the data by recognising inputs such as "four", "IV", and "4" as the same value.
+::: {.callout-note icon="false"}
+## What is your favourite social media platform?
 
--   **"Have you ever tested positive to COVID-19?"**. Remove the "Other" option. The question asks for a yes/no answer.
+Change the *text input* into a *select input*.
 
--   **"How much time do you usually spend on DATA2x02 each week?"**. Rather than allowing for text input, which accepts subjective answers such as "a lot", use a slider input from 0 hours to 168 hours (which encompasses all possible times).
+There is a lot of debate about what is a "real" social media platform. Anecdotally, many people seem to believe that the new social media phenomenon "BeReal" is not a social media platform, even those who use BeReal. By providing "BeReal" among others as a clear option, responders will give more accurate data.
+:::
 
--   **"On average, how much are you able to save per week (in AUD)?"**. Similar to above. Use an input which only accepts integers (positive or negative).
+::: {.callout-note icon="false"}
+## On average, how many hours each week do you spend exercising?
 
--   **"How many hours a week do you spend studying?"**. Same as above.
+Change the text input into a numeric slider input. This will prevent the need to clean the data by recognising inputs such as "four", "IV", and "4" as the same value.
+:::
 
--   **"How many hours do you spend on social media per day?"**. Same as above.
+::: {.callout-note icon="false"}
+## Have you ever tested positive to COVID-19?
 
--   **"If you were to spend two weeks travelling around Spain, how much would you budget towards spending each day (all inclusive: accomodation/activities/food/drink/entertainment)?"**. Same as above.
+Remove the "Other" option. The question asks for a yes/no answer.
+:::
 
--   **"How many hours a week (on average) do you work in paid employment?"**. Same as above.
+::: {.callout-note icon="false"}
+## How much time do you usually spend on DATA2x02 each week? ...
+
+as well as:
+
+**"On average, how much are you able to save per week (in AUD)?"**,
+
+**"How many hours do you spend on social media per day?"**,
+
+**"If you were to spend two weeks travelling around Spain, how much would you budget towards spending each day (all inclusive: accomodation / activities / food / drink / entertainment)?"**,
+
+**"How many hours a week (on average) do you work in paid employment?"**, and
+
+**"How many hours a week do you spend studying?"**.
+
+Rather than allowing text input, which accepts subjective answers such as "a lot", use a slider input
+:::
+
+# Version, Packages and Cleaning
+
+The calculations in this report were performed in R [@R-base] within the Quarto environment [@quarto] for reproducibility. Data wrangling was performed in base R and the tidyverse [@tidyverse2019] with a single use of naniar [@naniar]. Graphs were produced with ggplot2 [@tidyverse2019].
+
+Names of the variables were shortened. Extreme values were treated individually; either the entire entry was removed, or the extreme value was replaced with some aggregate. To conserve as much data as possible, missing values were replaced with aggregates where viable.
 
 # Aim
 
@@ -107,7 +141,7 @@ The aim of this report is to answer three questions:
 
 (3) Do DATA2902 students participate in different sports at a different proportion compared to DATA2002 students?
 
-For results: Q1 answer is YES, so what other factors may be confounding these results?
+These questions work linearly; the results of questions two and three may provide answers to the result of question one. Before I can answer these questions, the data will need to be cleaned.
 
 # Importing Data
 
@@ -441,15 +475,15 @@ Recall the questions that this report intends to address.
 
 (3) Do DATA2902 students participate in different sports at a different proportion compared to DATA2002 students?
 
-Each of these questions need to be investigated using a different test. Immediately, it is clear that
+Each of these questions need to be investigated using a different test. I will be analysing data from the `wam`, `employment_hrs`, and `sport` columns in the dataframe.
 
--   **`wam`** and **`employment_hrs`** are numerical variables, and
+## 1. Do *DATA2902* students achieve statistically higher WAMS than *DATA2002* students at the p \< 0.05 level?
 
--   **`sport`** is a categorical variable.
+Some interesting comparisons can be made between the DATA2902 students and the DATA2002 students. Before the more nuanced comparisons can be made, we need to compare DATA2902 and DATA2002 students using their most fundamental difference: results in previous units of study.
 
-## 1. Do DATA2902 students achieve higher WAMS than DATA2002 students?
+Sydney University's most general statistic used to quantify results in previous units of study is the Weighted Average Mark (WAM). Hence, the main aim of this report is to clarify whether there is a statistically significant difference in WAM between DATA2902 and DATA2002 students. In particular, we are interested in whether DATA2902 students generally outperform DATA2002 students or not.
 
-Lets answer question 1 first. The distribution of DATA2902 WAM is fairly normal, as we can see by looking at the qqplots (@fig-qqplotwam ). It could be argued that the DATA2002 WAM distribution is not normal due to the extreme deviation of the left hand side points from the qqline.
+Across both the DATA2902 cohort and DATA2002 cohort, the distribution of WAM is not normal, as we can see by looking at the qqplots (@fig-qqplotwam ). In both the DATA2002 qqplot and DATA2902 qqplot, the endpoints begin to diverge from the qqplot, though the deviation is more significant in DATA2002.
 
 ```{r}
 #| label: fig-qqplotwam
@@ -464,7 +498,7 @@ df |>
   labs(x="Standard normal quantiles", y="WAM")
 ```
 
-Similarly, the data is somewhat symmetric, as shown in the density histogram in @fig-histwam .
+The data in both cohorts is, however, reasonably symmetric. This can be seen in the density histogram in @fig-histwam .
 
 ```{r}
 #| label: fig-histwam
@@ -514,7 +548,7 @@ t.test(d2902_wam, d2002_wam, alternative="greater", paired=FALSE, var.equal=FALS
 
 From the hypothesis test we see that the probability of getting the current result, or a more extreme result, is approximately one in 10,000. Hence it is probable that $H_1$ is true, meaning DATA2902 students achieve a higher WAM than DATA2002 students, on average.
 
-## 2. Do DATA2902 students work a different number of hours compared to DATA2002 students?
+## 2. Are hours worked statistically different at the p \< 0.05 level between *DATA2902* and *DATA2002* students?
 
 Why do DATA2902 students perform better than DATA2002 students across all of their classes? Could there be any other factors influencing these results?
 
@@ -576,7 +610,7 @@ p1 + p2 + plot_layout(guides = 'collect') +
 
 The visualisations show that generally students with higher WAMs tend to work fewer hours, with a more negative correlation among DATA2902 students. We also see that the distribution of Employment Hours among each stream is identical but neither normal nor symmetric.
 
-## 3. Do DATA2902 students participate in different sports at a different proportion compared to DATA2002 students?
+## 3. Do DATA2902 students participate in different sports at a statistically different proportion compared to DATA2002 students?
 
 We first need to produce a contingency table for each sport among DATA2x02 students. First modify a code snippet from @tarr2022 below to create a more friendly dataframe.
 
@@ -621,3 +655,5 @@ Issues: the DATA2002 students who responded are not representative of the entire
 The sampling from each group is not independent and identically distributed (see @fig-histwam ).
 
 Note that the WAM is not affected too much by sample bias, following https://imgur.com/a/TFZzTZv.
+
+# References
