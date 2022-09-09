@@ -498,9 +498,9 @@ df |>
   labs(x="Standard normal quantiles", y="WAM")
 ```
 
-The data in both cohorts is, however, reasonably symmetric. This can be seen in the density histogram in @fig-histwam .
+The data in both cohorts is, however, reasonably symmetric. This can be seen in the density histograms in @fig-histwam .
 
-```{r}
+```{r, fig.asp=0.5, out.width= "100%", warning=FALSE, message=FALSE}
 #| label: fig-histwam
 #| fig-cap: "Histogram of students' WAM"
 
@@ -522,23 +522,30 @@ df |>
   geom_density(alpha=0.3) +
   geom_vline(data=avg_2x02, aes(xintercept=avg, color=normal_advanced),
              linetype="dashed") + 
-  xlab("Weighted Average Mark (WAM)") + 
-  ylab("Proportion in D2x02 Group")
+  facet_grid(cols = vars(normal_advanced), labeller = ) + 
+  labs(x="Weighted Average Mark (WAM)", y="Proportion in D2x02 Group", fill="Stream") +
+  guides(color=FALSE)
+
 ```
 
-We are saved by the Central Limit Theorem here, as there is a large enough sample size of 33 DATA2902 students and 120 DATA2002 students. Therefore, I use a two-sample t-test test with the null hypothesis $H_0: \mu_\text{Adv} = \mu_\text{Nml}$ and the alternative hypothesis $H_1: \mu_\text{Adv} > \mu_\text{Nml}$.
+We are saved by the Central Limit Theorem here, as there is a large enough sample size of 33 DATA2902 students and 120 DATA2002 students. Therefore, I use a two-sample t-test test
 
-Lets first look at the mean, standard deviation, and sample size of each group.
+Lets first look at the mean, standard deviation, and sample size of each group (@tbl-wamsummary ).
 
 ```{r}
-df |>
-  group_by(normal_advanced) |>
-  summarise(Mean = mean(wam), SD = sd(wam), n=n())
+#| label: tbl-wamsummary
+#| tbl-cap: "Summary statistics for WAM across the two DATA2x02 streams."
+summary_df = df |>
+  dplyr::group_by(normal_advanced) |>
+  dplyr::summarise(Mean = mean(wam), SD = sd(wam), n=n())
+
+knitr::kable(summary_df)
 ```
 
 It appears that DATA2902 students achieve higher WAMs with less spread than DATA2002 students. Lets check that this is not purely due to chance with the two-sample t-test.
 
 ```{r}
+#| output: false
 d2902_wam = unlist(df[df$normal_advanced == "DATA2902", "wam"])
 d2002_wam = unlist(df[df$normal_advanced == "DATA2002", "wam"])
 
@@ -546,7 +553,12 @@ d2002_wam = unlist(df[df$normal_advanced == "DATA2002", "wam"])
 t.test(d2902_wam, d2002_wam, alternative="greater", paired=FALSE, var.equal=FALSE, correct=FALSE, conf.level = 0.95)
 ```
 
-From the hypothesis test we see that the probability of getting the current result, or a more extreme result, is approximately one in 10,000. Hence it is probable that $H_1$ is true, meaning DATA2902 students achieve a higher WAM than DATA2002 students, on average.
+1.  **Hypothesis:** Let $\mu_\text{Adv}$ be the mean WAM of *DATA2902* students, and $\mu_\text{Nml}$ be the mean WAM of *DATA2002* students. The null hypothesis is $H_0: \mu_\text{Adv} = \mu_\text{Nml}$ and the alternative hypothesis $H_1: \mu_\text{Adv} > \mu_\text{Nml}$.
+2.  **Assumptions:** the two population means follow a normal distribution and are roughly symmetric (@fig-histwam ). The populations are identically distributed and sampling is performed independently.
+3.  **Test statistic:** $t_0 = \frac{\mu_\text{Adv} - \mu_\text{Nml}}{\sqrt{\frac{\sigma^2_\text{Adv}}{n_\text{Adv}}+\frac{\sigma^2_\text{Nml}}{n_\text{Nml}}}}$ where $\mu_\text{Adv}=80.4$, $\mu_\text{Nml} = 72.8$, $\sigma_\text{Adv} =9.3$, $\sigma_\text{Nml} = 10.4$, $n_\text{Adv} = 33$, and $n_\text{Nml} = 120$.
+4.  **Observed test statistic:** $t_0=4.03$
+5.  **p-value:** $P(t_{151}\leq 4.03) < 0.0001$
+6.  **Decision:** Since the p-value is less than 0.05, we reject the null hypothesis in favour of the alternative hypothesis. Hence, we conclude that *DATA2902* students achieve a higher WAM than *DATA2002* students, on average.
 
 ## 2. Are hours worked statistically different at the p \< 0.05 level between *DATA2902* and *DATA2002* students?
 
@@ -556,7 +568,7 @@ One possibility is that DATA2902 students have a greater work ethic than DATA200
 
 Another possibility is that the advanced stream students do not work as much as the normal stream students, and hence spent more time studying.
 
-We can attempt to visualise a correlation by looking at the data among those who do work, as in @fig-histscat .
+We can attempt to visualize a correlation by looking at the data among those who do work, as in @fig-histscat .
 
 ```{r, fig.asp=0.5, out.width= "100%", warning=FALSE, message=FALSE}
 #| label: fig-histscat
@@ -608,13 +620,48 @@ p1 + p2 + plot_layout(guides = 'collect') +
   plot_annotation(tag_levels = 'A')
 ```
 
-The visualisations show that generally students with higher WAMs tend to work fewer hours, with a more negative correlation among DATA2902 students. We also see that the distribution of Employment Hours among each stream is identical but neither normal nor symmetric.
+The visualizations show that generally students with higher WAMs tend to work fewer hours, with a more negative correlation among DATA2902 students. We also see that the distribution of Employment Hours among each stream is identical but neither normal nor symmetric. We will use a Wilcoxon rank-sum test here.
+
+1.  **Hypothesis:** Let $\mu_\text{Adv}$ be the mean hours worked for *DATA2902* students, and $\mu_\text{Nml}$ be the mean hours worked for *DATA2002* students. The null hypothesis is $H_0: \mu_\text{Adv} = \mu_\text{Nml}$ and the alternative hypothesis $H_1: \mu_\text{Adv} \neq \mu_\text{Nml}$.
+2.  **Assumptions:** the two populations are independent and follow the same distribution but
+    differ by a shift (@fig-histscat ).
+3.  **Test statistic:** $W = R_1 + R_2 +\ ...\ + R_{33}$ where \$R_i\\in \\text{ranks}(X\_\\text{Adv})\$. Under \$H_0\$, $W$ follows the $WRS(n_\text{Adv}, n_\text{Nml})$ distribution.
+4.  **Observed test statistic:** $w=2996.5$
+5.  **p-value:** $2P(W\geq 2996.5) < 0.05$
+6.  **Decision:** Since the p-value is less than 0.05, we reject the null hypothesis in favour of the alternative hypothesis. Hence, we conclude that *DATA2902* students do not work the same number of hours as *DATA2002* students. Moreover, @tbl-employmentsummary shows that *DATA2902* students work more hours than *DATA2902* hours, on average.
+
+```{r}
+#| output: false
+x = df[df$normal_advanced == "DATA2902",]$employment_hrs
+y = df[df$normal_advanced == "DATA2002",]$employment_hrs
+r = rank(c(x, y))
+w_sum = c("W" = sum(r[1:length(x)]))
+min_w = length(x)*(length(x)+1)/2
+
+w_sum
+2*pwilcox(w_sum - min_w - 1, length(x), length(y), lower.tail=FALSE)
+```
+
+```{r}
+#| label: tbl-employmentsummary
+#| tbl-cap: "Summary statistics for employment hours across the two DATA2x02 streams."
+
+summary_df = df |>
+  dplyr::group_by(normal_advanced) |>
+  dplyr::summarise(Mean = mean(employment_hrs), SD = sd(employment_hrs), n=n())
+
+knitr::kable(summary_df)
+```
 
 ## 3. Do DATA2902 students participate in different sports at a statistically different proportion compared to DATA2002 students?
 
-We first need to produce a contingency table for each sport among DATA2x02 students. First modify a code snippet from @tarr2022 below to create a more friendly dataframe.
+The previous result informs us that the success of DATA2902 students could be explained by their greater work ethic. Does this greater work ethic also come paired with a more active lifestyle? Could the better results of DATA2902 be explained by such an active lifestyle, confirming the countless studies which suggest that exercise boosts your mental ability? While the latter cannot be confirmed by this study, as many other confounding variables may also be involved, we can certainly address the prior.
+
+Before we perform a hypothesis test on the data, we need to investigate some of the data at hand. Hence, we produce a contingency table for each sport among DATA2x02 students. First modify a code snippet from @tarr2022 below to create a more friendly dataframe.
 
 ```{r}
+#| label: tbl-employmentsummary
+#| tbl-cap: "Summary statistics for employment hours across the two DATA2x02 streams."
 sport <- df |>
   dplyr::select(identifier, sport, normal_advanced) |>
   tidyr::separate_rows(sport,
@@ -627,6 +674,8 @@ sport <- df |>
 cont_table = table(sport$normal_advanced, sport$sport)
 knitr::kable(cont_table)
 ```
+
+This contingency table can be extended to a more visual bar chart.
 
 The null hypothesis here is $H_0: p_{ij}=p_{\bullet j}=y_{\bullet j}/n$, and the alternative hypothesis is $H_1: p_{ij}\neq p_{\bullet j}$. Since many of the cells contain values that are $\leq 5$, I will need to perform a permutation test.
 
