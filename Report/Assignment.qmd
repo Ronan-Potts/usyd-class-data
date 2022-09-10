@@ -697,39 +697,45 @@ sport %>%
 
 As many of the entries in this table contain values that are less than five, I will use a Monte Carlo permutation test.
 
-1.  **Hypothesis:** Let $\mu_\text{Adv}$ be the mean hours worked for *DATA2902* students, and $\mu_\text{Nml}$ be the mean hours worked for *DATA2002* students. The null hypothesis is $H_0: \mu_\text{Adv} = \mu_\text{Nml}$ and the alternative hypothesis $H_1: \mu_\text{Adv} \neq \mu_\text{Nml}$.
-2.  **Assumptions:** the two populations are independent and follow the same distribution but differ by a shift (@fig-histscat ).
-3.  **Test statistic:** $W = R_1 + R_2 +\ ...\ + R_{33}$ where \$R_i\\in \\text{ranks}(X\_\\text{Adv})\$. Under \$H_0\$, $W$ follows the $WRS(n_\text{Adv}, n_\text{Nml})$ distribution.
-4.  **Observed test statistic:** $w=2996.5$
-5.  **p-value:** $2P(W\geq 2996.5) < 0.05$
-6.  **Decision:** Since the p-value is less than 0.05, we reject the null hypothesis in favour of the alternative hypothesis. Hence, we conclude that *DATA2902* students do not work the same number of hours as *DATA2002* students. Moreover, @tbl-employmentsummary shows that *DATA2902* students work more hours than *DATA2902* hours, on average.
-
-The null hypothesis here is $H_0: p_{ij}=p_{\bullet j}=y_{\bullet j}/n$, and the alternative hypothesis is $H_1: p_{ij}\neq p_{\bullet j}$. Since many of the cells contain values that are $\leq 5$, I will need to perform a permutation test.
-
 ```{r, warning=FALSE}
 set.seed(2022)
 sport_data = as.matrix(cont_table)
-chisq.test(sport_data, simulate.p.value=TRUE, B=10000)
+chi_test = chisq.test(sport_data, simulate.p.value=TRUE, B=10000)
 ```
 
-The permutation test gives a p-value of `0.48`. Hence, the null hypothesis $H_0: p_{ij}=p_{\bullet j}=y_{\bullet j}/n$ cannot be rejected. It is not unlikely that DATA2902 students participate in different sports at a different rate from DATA2002 students.
-
-## Random
-
-1.  **Module 2:** The distribution of WAM requires numerical data testing. Use a two-sample t test here.
-2.  **Module 2:** The distribution of hours worked requires numerical data testing. We will use a Wilcoxon rank-sum test.
-3.  **Module 1 & Permutation testing:** The participation in sports is categorical, and requires a test of independence. Note that we can't test for homogeneity as the subjects are not split into the groups randomly. We also need to do permutation testing here as some sports have less than 5 people.
+1.  **Hypothesis:** $H_0: p_{ij} = p_{\bullet j} = y_{\bullet j}/n$ and $H_1: p_{ij}\neq p_{\bullet j}$.
+2.  **Assumptions:** the observations are exchangeable. This is justified via the random assignment in the Monte Carlo test.
+3.  **Test statistic:** $t_0 = \displaystyle\sum^2_i\sum^{20}_j\frac{(y_{ij}-e_{ij})^2}{e_{ij}} \not\sim \chi^2_{20}$ as some cell counts are less than 5.
+4.  **Observed test statistic:** $t_0 =$ `r signif(chi_test$statistic, 3)` .
+5.  **p-value:** $P(T \geq t_0) = \frac{n(T\geq t_0)}{n_\text{total}} =$ `r signif(chi_test$p.value, 3)` $\geq 0.05$.
+6.  **Decision:** Since the p-value is greater than 0.05, we cannot reject the null hypothesis in favour of the alternative hypothesis. Indeed, @fig-barsport confirms that the proportion of students who participate in each sport across *DATA2902* and *DATA2002* is roughly equal.
 
 # Results
 
-## Limitations of Investigation
+Despite all of the cleaning and analysis above, there is still one elephant in the room; the DATA2x02 students who responded to the survey are not representative of the entire DATA2002 cohort. This opens the conclusions drawn in this report to be influenced by many biases, such as non-response/self-selection bias which inherently induces an under-coverage of the DATA2x02 cohort.
 
-1.  *Do DATA2902 students achieve higher WAMs than DATA2002 students?*
+Fortunately, it appears as if these biases have not had a large impact on factors such as WAM. For example, the average WAM across the entire responding cohort is `r signif(mean(df$wam), 2` which is approximately equal to the current average WAM at the University of Sydney (see [this](https://imgur.com/a/TFZzTZv) semester average mark distribution across the USYD faculty of engineering in 2018).
 
-Issues: the DATA2002 students who responded are not representative of the entire DATA2002 cohort.
+Moreover, while these biases may have had a net impact over the entire cohort of responders, by comparing and contrasting the summary statistics of two groups of responders, we reduce the potential impact of any bias. Hence, the aim of this report still has integrity in stating that:
 
-The sampling from each group is not independent and identically distributed (see @fig-histwam ).
+1.  DATA2902 students perform better, on average, than DATA2002 students,
+2.  DATA2902 students work more, on average, than DATA2002 students,
+3.  DATA2902 students and DATA2002 students participate in the same sports in equal proportions.
 
-Note that the WAM is not affected too much by sample bias, following https://imgur.com/a/TFZzTZv.
+It is worthwhile to note that while the above is probably true on average across the entire DATA2x02 cohort, it cannot reliably be used on an individual level, even if we were to ignore the ethical boundaries of such an action. For example, suppose that you did choose to compare a random DATA2902 student to a random DATA2002 student via WAM.
+
+```{r}
+#| output: false
+n=100
+
+set.seed(2022)
+
+rand_n_D2902 = sample(unlist(df[df$normal_advanced == "DATA2902", "wam"]), size=n, replace=TRUE)
+rand_n_D2002 = sample(unlist(df[df$normal_advanced == "DATA2002", "wam"]), size=n, replace=TRUE)
+
+sum(rand_n_D2902 > rand_n_D2002) / n
+```
+
+The percentage of the time that the DATA2902 has a higher WAM is `r sum(rand_n_D2902 > rand_n_D2002) / n` which is by no means statistically significant.
 
 # References
