@@ -17,7 +17,7 @@ number-sections: true # (Optional) Puts numbers next to heading/subheadings
 
 # Introduction
 
-This report analyses data from a survey addressed to students at the University of Sydney who take *Data Analytics: Learning from Data* (DATA2x02). The survey was run from 15 August 2022 to 23 August 2022 and contains 38 questions. Participants found the survey on the DATA2x02 edstem page, and the survey was advertised on the DATA2x02 edstem page as well as in the DATA2x02 lectures.
+This report analyses data from a survey addressed to students at the University of Sydney (@fig-usyd-quad ) who take *Data Analytics: Learning from Data* (DATA2x02). The survey was run from 15 August 2022 to 23 August 2022 and contains 38 questions which can be found at [this University of Sydney GitHub page](https://pages.github.sydney.edu.au/DATA2002/2022/extra/DATA2x02_survey_2022.pdf). The data can be downloaded [here](https://docs.google.com/spreadsheets/d/e/2PACX-1vTML6kYv2rDjKbPTBuSoX6bdkAWb5Hcm7IWxFmpqftgpt-AFiRhSdDn68XKjGAC_SqQHspAw78tMMuQ/pub?gid=1782171849&single=true&output=tsv). Participants found the survey on the DATA2x02 edstem page, and the survey was advertised on the DATA2x02 edstem page as well as in the DATA2x02 lectures.
 
 ```{r fig-usyd-quad, echo = FALSE, out.width= '100%', fig.cap = "University of Sydney's main quadrangle.", fig.show='hold', fig.align='center'}
 knitr::include_graphics("usyd-quadrangle.jpg")
@@ -522,7 +522,7 @@ df |>
   geom_density(alpha=0.3) +
   geom_vline(data=avg_2x02, aes(xintercept=avg, color=normal_advanced),
              linetype="dashed") + 
-  facet_grid(cols = vars(normal_advanced), labeller = ) + 
+  facet_grid(cols = vars(normal_advanced)) + 
   labs(x="Weighted Average Mark (WAM)", y="Proportion in D2x02 Group", fill="Stream") +
   guides(color=FALSE)
 
@@ -550,14 +550,14 @@ d2902_wam = unlist(df[df$normal_advanced == "DATA2902", "wam"])
 d2002_wam = unlist(df[df$normal_advanced == "DATA2002", "wam"])
 
 # Looks at d2902_wam - d2002_wam
-t.test(d2902_wam, d2002_wam, alternative="greater", paired=FALSE, var.equal=FALSE, correct=FALSE, conf.level = 0.95)
+t_test = t.test(d2902_wam, d2002_wam, alternative="greater", paired=FALSE, var.equal=FALSE, correct=FALSE, conf.level = 0.95)
 ```
 
 1.  **Hypothesis:** Let $\mu_\text{Adv}$ be the mean WAM of *DATA2902* students, and $\mu_\text{Nml}$ be the mean WAM of *DATA2002* students. The null hypothesis is $H_0: \mu_\text{Adv} = \mu_\text{Nml}$ and the alternative hypothesis $H_1: \mu_\text{Adv} > \mu_\text{Nml}$.
 2.  **Assumptions:** the two population means follow a normal distribution and are roughly symmetric (@fig-histwam ). The populations are identically distributed and sampling is performed independently.
-3.  **Test statistic:** $t_0 = \frac{\mu_\text{Adv} - \mu_\text{Nml}}{\sqrt{\frac{\sigma^2_\text{Adv}}{n_\text{Adv}}+\frac{\sigma^2_\text{Nml}}{n_\text{Nml}}}}$ where $\mu_\text{Adv}=80.4$, $\mu_\text{Nml} = 72.8$, $\sigma_\text{Adv} =9.3$, $\sigma_\text{Nml} = 10.4$, $n_\text{Adv} = 33$, and $n_\text{Nml} = 120$.
-4.  **Observed test statistic:** $t_0=4.03$
-5.  **p-value:** $P(t_{151}\leq 4.03) < 0.0001$
+3.  **Test statistic:** $t_0 = \frac{\mu_\text{Adv} - \mu_\text{Nml}}{\sqrt{\frac{\sigma^2_\text{Adv}}{n_\text{Adv}}+\frac{\sigma^2_\text{Nml}}{n_\text{Nml}}}}$ where $\mu_\text{Adv}=$ `r signif(mean(d2902_wam), 3)`, \$\\mu\_\\text{Nml} = \$ `r signif(mean(d2002_wam), 3)`, $\sigma_\text{Adv} =$ `r signif(sd(d2902_wam), 3)`, $\sigma_\text{Nml} =$ `r signif(sd(d2002_wam), 3)`, $n_\text{Adv} =$ `r length(d2902_wam)`, and $n_\text{Nml} =$ `r length(d2002_wam)`.
+4.  **Observed test statistic:** $t_0=$ `r signif(as.numeric(t_test["statistic"]), 3)`
+5.  **p-value:** $P(t_{151}\leq$ `r signif(as.numeric(t_test["statistic"]), 3)` $) < 0.0001$
 6.  **Decision:** Since the p-value is less than 0.05, we reject the null hypothesis in favour of the alternative hypothesis. Hence, we conclude that *DATA2902* students achieve a higher WAM than *DATA2002* students, on average.
 
 ## 2. Are hours worked statistically different at the p \< 0.05 level between *DATA2902* and *DATA2002* students?
@@ -622,14 +622,6 @@ p1 + p2 + plot_layout(guides = 'collect') +
 
 The visualizations show that generally students with higher WAMs tend to work fewer hours, with a more negative correlation among DATA2902 students. We also see that the distribution of Employment Hours among each stream is identical but neither normal nor symmetric. We will use a Wilcoxon rank-sum test here.
 
-1.  **Hypothesis:** Let $\mu_\text{Adv}$ be the mean hours worked for *DATA2902* students, and $\mu_\text{Nml}$ be the mean hours worked for *DATA2002* students. The null hypothesis is $H_0: \mu_\text{Adv} = \mu_\text{Nml}$ and the alternative hypothesis $H_1: \mu_\text{Adv} \neq \mu_\text{Nml}$.
-2.  **Assumptions:** the two populations are independent and follow the same distribution but
-    differ by a shift (@fig-histscat ).
-3.  **Test statistic:** $W = R_1 + R_2 +\ ...\ + R_{33}$ where \$R_i\\in \\text{ranks}(X\_\\text{Adv})\$. Under \$H_0\$, $W$ follows the $WRS(n_\text{Adv}, n_\text{Nml})$ distribution.
-4.  **Observed test statistic:** $w=2996.5$
-5.  **p-value:** $2P(W\geq 2996.5) < 0.05$
-6.  **Decision:** Since the p-value is less than 0.05, we reject the null hypothesis in favour of the alternative hypothesis. Hence, we conclude that *DATA2902* students do not work the same number of hours as *DATA2002* students. Moreover, @tbl-employmentsummary shows that *DATA2902* students work more hours than *DATA2902* hours, on average.
-
 ```{r}
 #| output: false
 x = df[df$normal_advanced == "DATA2902",]$employment_hrs
@@ -641,6 +633,13 @@ min_w = length(x)*(length(x)+1)/2
 w_sum
 2*pwilcox(w_sum - min_w - 1, length(x), length(y), lower.tail=FALSE)
 ```
+
+1.  **Hypothesis:** Let $\mu_\text{Adv}$ be the mean hours worked for *DATA2902* students, and $\mu_\text{Nml}$ be the mean hours worked for *DATA2002* students. The null hypothesis is $H_0: \mu_\text{Adv} = \mu_\text{Nml}$ and the alternative hypothesis $H_1: \mu_\text{Adv} \neq \mu_\text{Nml}$.
+2.  **Assumptions:** the two populations are independent and follow the same distribution but differ by a shift (@fig-histscat ).
+3.  **Test statistic:** $W = R_1 + R_2 +\ ...\ + R_{33}$ where \$R_i\\in \\text{ranks}(X\_\\text{Adv})\$. Under \$H_0\$, $W$ follows the $WRS(n_\text{Adv}, n_\text{Nml})$ distribution.
+4.  **Observed test statistic:** $w=$ `r w_sum`
+5.  **p-value:** $2P(W\geq$ `r w_sum` $) < 0.05$
+6.  **Decision:** Since the p-value is less than 0.05, we reject the null hypothesis in favour of the alternative hypothesis. Hence, we conclude that *DATA2902* students do not work the same number of hours as *DATA2002* students. Moreover, @tbl-employmentsummary shows that *DATA2902* students work more hours than *DATA2902* hours, on average.
 
 ```{r}
 #| label: tbl-employmentsummary
@@ -655,12 +654,12 @@ knitr::kable(summary_df)
 
 ## 3. Do DATA2902 students participate in different sports at a statistically different proportion compared to DATA2002 students?
 
-The previous result informs us that the success of DATA2902 students could be explained by their greater work ethic. Does this greater work ethic also come paired with a more active lifestyle? Could the better results of DATA2902 be explained by such an active lifestyle, confirming the countless studies which suggest that exercise boosts your mental ability? While the latter cannot be confirmed by this study, as many other confounding variables may also be involved, we can certainly address the prior.
+The previous result informs us that the success of DATA2902 students could be explained by a greater work ethic. If such a statement is true, does this greater work ethic also come paired with a different sport preference? Could the better results of DATA2902 be explained by a more unique sport lifestyle? While the latter cannot be definitively confirmed by this study, as many other confounding variables may also be involved, we can certainly address the prior.
 
-Before we perform a hypothesis test on the data, we need to investigate some of the data at hand. Hence, we produce a contingency table for each sport among DATA2x02 students. First modify a code snippet from @tarr2022 below to create a more friendly dataframe.
+Before we perform a hypothesis test on the data, we need to investigate some of the data at hand. Hence, we produce a contingency table for each sport among DATA2x02 students (@tbl-sportcontingency ) using some code from @tarr2022 .
 
 ```{r}
-#| label: tbl-employmentsummary
+#| label: tbl-sportcontingency
 #| tbl-cap: "Summary statistics for employment hours across the two DATA2x02 streams."
 sport <- df |>
   dplyr::select(identifier, sport, normal_advanced) |>
@@ -675,7 +674,35 @@ cont_table = table(sport$normal_advanced, sport$sport)
 knitr::kable(cont_table)
 ```
 
-This contingency table can be extended to a more visual bar chart.
+This contingency table can be extended to a more visual bar chart (@fig-barsport ) for each of the groups of students by using code from @tarr2022 . Visually, it appears that the distributions for the number of participants in each sport is approximately the same in both the *DATA2902* and *DATA2002* class.
+
+```{r, fig.asp=0.5, out.width= "100%", warning=FALSE, message=FALSE}
+#| label: fig-barsport
+#| fig-cap: "Bar charts of students' sport choices"
+sport <- df %>%
+  dplyr::select(identifier, sport, normal_advanced) %>% 
+  tidyr::separate_rows(sport,
+                       sep = ", ") %>% 
+  dplyr::mutate(sport = tools::toTitleCase(sport),
+                sport = factor(sport),
+                sport = forcats::fct_lump_min(sport, 2))
+
+sport %>%
+  ggplot() + 
+  aes(y = reorder(sport, sport, function(x) length(x)), fill=normal_advanced) +
+  geom_bar() + 
+  facet_grid(cols = vars(normal_advanced)) +
+  labs(y = "", x = "Count", fill="Stream")
+```
+
+As many of the entries in this table contain values that are less than five, I will use a Monte Carlo permutation test.
+
+1.  **Hypothesis:** Let $\mu_\text{Adv}$ be the mean hours worked for *DATA2902* students, and $\mu_\text{Nml}$ be the mean hours worked for *DATA2002* students. The null hypothesis is $H_0: \mu_\text{Adv} = \mu_\text{Nml}$ and the alternative hypothesis $H_1: \mu_\text{Adv} \neq \mu_\text{Nml}$.
+2.  **Assumptions:** the two populations are independent and follow the same distribution but differ by a shift (@fig-histscat ).
+3.  **Test statistic:** $W = R_1 + R_2 +\ ...\ + R_{33}$ where \$R_i\\in \\text{ranks}(X\_\\text{Adv})\$. Under \$H_0\$, $W$ follows the $WRS(n_\text{Adv}, n_\text{Nml})$ distribution.
+4.  **Observed test statistic:** $w=2996.5$
+5.  **p-value:** $2P(W\geq 2996.5) < 0.05$
+6.  **Decision:** Since the p-value is less than 0.05, we reject the null hypothesis in favour of the alternative hypothesis. Hence, we conclude that *DATA2902* students do not work the same number of hours as *DATA2002* students. Moreover, @tbl-employmentsummary shows that *DATA2902* students work more hours than *DATA2902* hours, on average.
 
 The null hypothesis here is $H_0: p_{ij}=p_{\bullet j}=y_{\bullet j}/n$, and the alternative hypothesis is $H_1: p_{ij}\neq p_{\bullet j}$. Since many of the cells contain values that are $\leq 5$, I will need to perform a permutation test.
 
