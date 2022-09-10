@@ -127,7 +127,7 @@ Rather than allowing text input, which accepts subjective answers such as "a lot
 
 # Version, Packages and Cleaning
 
-The calculations in this report were performed in R [@R-base] within the Quarto environment [@quarto] for reproducibility. Data wrangling was performed in base R and the tidyverse [@tidyverse2019] with a single use of naniar [@naniar]. Graphs were produced with ggplot2 [@tidyverse2019].
+The calculations in this report were performed in R [@R-base] within the Quarto environment [@quarto] for reproducibility. Data wrangling was performed in base R and the tidyverse [@tidyverse2019] with a single use of naniar [@naniar]. Graphs were produced with ggplot2 [@tidyverse2019]. Each code chunk in this report features `package_name::` before every non-base and non-ggplot2 function that is used.
 
 Names of the variables were shortened. Extreme values were treated individually; either the entire entry was removed, or the extreme value was replaced with some aggregate. To conserve as much data as possible, missing values were replaced with aggregates where viable.
 
@@ -178,16 +178,16 @@ new_names = c("timestamp","covid_positive","living_arrangements","height","uni_t
 colnames(df) = new_names
 
 # combine old and new into a data frame:
-name_combo = bind_cols(New = new_names, Old = old_names)
+name_combo = dplyr::bind_cols(New = new_names, Old = old_names)
 important_vars = c("timestamp", "study_hrs", "study_load", "work", "normal_advanced", "exercise_hrs", "employment_hrs", "weekly_saving", "data2x02_hrs", "sport", "wam")
 name_combo |>
-  filter(name_combo$New %in% important_vars) |>
+  dplyr::filter(name_combo$New %in% important_vars) |>
   gt::gt()
 
 
 # subset dataframe and create unique identifier for each entry
 df = df |>
-  mutate(identifier = row_number()) |>
+  dplyr::mutate(identifier = row_number()) |>
   subset(select=c("identifier", important_vars[important_vars != "timestamp"]))
 ```
 
@@ -202,12 +202,12 @@ Before I can deal with any `NA` values, I first need to deal with absurd (i.e. o
 #|    - ""
 #| layout-ncol: 2
 
-hist(df$study_hrs, main="", xlab=as.character(name_combo[name_combo$New == "study_hrs",2]))
-hist(df$exercise_hrs, main="", xlab=as.character(name_combo[name_combo$New == "exercise_hrs",2]))
-hist(df$employment_hrs, main="", xlab=as.character(name_combo[name_combo$New == "employment_hrs",2]))
-hist(df$weekly_saving, main="", xlab=as.character(name_combo[name_combo$New == "weekly_saving",2]))
-hist(df$data2x02_hrs, main="", xlab=as.character(name_combo[name_combo$New == "data2x02_hrs",2]))
-hist(df$wam, main="", xlab=as.character(name_combo[name_combo$New == "wam",2]))
+graphics::hist(df$study_hrs, main="", xlab=as.character(name_combo[name_combo$New == "study_hrs",2]))
+graphics::hist(df$exercise_hrs, main="", xlab=as.character(name_combo[name_combo$New == "exercise_hrs",2]))
+graphics::hist(df$employment_hrs, main="", xlab=as.character(name_combo[name_combo$New == "employment_hrs",2]))
+graphics::hist(df$weekly_saving, main="", xlab=as.character(name_combo[name_combo$New == "weekly_saving",2]))
+graphics::hist(df$data2x02_hrs, main="", xlab=as.character(name_combo[name_combo$New == "data2x02_hrs",2]))
+graphics::hist(df$wam, main="", xlab=as.character(name_combo[name_combo$New == "wam",2]))
 ```
 
 Let's investigate the abnormal response of 100,000 hours spent studying per week. `r filter(df, study_hrs > 100)`
@@ -228,10 +228,10 @@ A similar process is applied to each of the other variables:
 
     ```{r}
     df <- df |>
-      mutate(exercise_hrs = replace(exercise_hrs, exercise_hrs==168, NA))
+      dplyr::mutate(exercise_hrs = replace(exercise_hrs, exercise_hrs==168, NA))
 
     df <- df |>
-      filter(!(identifier == "69"))
+      dplyr::filter(!(identifier == "69"))
     ```
 
 -   **`employment_hrs:`** A closer investigation on the row with greater than 50 employment hours gives fairly realistic results, including fewer study hours and more weekly savings to accommodate for the lager number of employment hours. Hence, this row will not be mutated. `r filter(df, employment_hrs > 50)`
@@ -246,8 +246,8 @@ A similar process is applied to each of the other variables:
 
     ```{r}
     df <- df |>
-      filter(identifier != "11") |>
-      filter(identifier != "187")
+      dplyr::filter(identifier != "11") |>
+      dplyr::filter(identifier != "187")
     ```
 
     Note that the `187` identifier was the only outlier in the distribution for DATA2x02 study hours, so we do not need to remove any more outliers from `data2x02_hrs`.
@@ -256,7 +256,7 @@ A similar process is applied to each of the other variables:
 
     ```{r}
     df <- df |>
-      mutate(wam = replace(wam, wam<10, NA))
+      dplyr::mutate(wam = replace(wam, wam<10, NA))
     ```
 
 ## Cleaning - NAs
@@ -283,12 +283,12 @@ First I need to deal with any potential `NA` values in the employment categories
     df <- df |>
       # Replace work value with "I don't currently work" if 0 employment_hours and 
       # work is NA.
-      mutate(work = if_else(
+      dplyr::mutate(work = dplyr::if_else(
         is.na(work) & employment_hrs == 0,
         true="I don't currently work",
         false=work)) |>
       # Filter to remove rows which contain NA values for work and employment_hrs
-      filter(!(is.na(work) & is.na(employment_hrs)))
+      dplyr::filter(!(is.na(work) & is.na(employment_hrs)))
     ```
 
     Similarly, looking at the "I don't currently work" category in `work`, some individuals have written nonzero values for `employment_hrs`.
@@ -299,7 +299,7 @@ First I need to deal with any potential `NA` values in the employment categories
 
     ```{r}
     df <- df |>
-      mutate(employment_hrs = if_else(
+      dplyr::mutate(employment_hrs = dplyr::if_else(
         work=="I don't currently work",
         true=0,
         false=employment_hrs)
@@ -310,7 +310,7 @@ First I need to deal with any potential `NA` values in the employment categories
 
     ```{r}
     df <- df |>
-      mutate(employment_hrs = case_when(
+      dplyr::mutate(employment_hrs = dplyr::case_when(
         is.na(employment_hrs) & work == "Full time" ~ sapply(df[df$work=="Full time",
                                                            "employment_hrs"],
                                                            mean,
@@ -350,7 +350,7 @@ First I need to deal with any potential `NA` values in the employment categories
 
     ```{r}
     df <- df |>
-      mutate(weekly_saving = case_when(
+      dplyr::mutate(weekly_saving = dplyr::case_when(
         is.na(weekly_saving) & work == "Full time" ~ sapply(df[df$work=="Full time",
                                                            "weekly_saving"],
                                                            mean,
@@ -400,7 +400,7 @@ Now I need to deal with any potential `NA` values in the study categories (study
 
     ```{r}
     df <- df |>
-      mutate(study_hrs = case_when(
+      dplyr::mutate(study_hrs = dplyr::case_when(
         is.na(study_hrs) & study_load == "Full time" ~ sapply(df[df$study_load=="Full time",
                                                            "study_hrs"],
                                                            mean,
@@ -420,7 +420,7 @@ Now I need to deal with any potential `NA` values in the study categories (study
 
     ```{r}
     df <- df |>
-      filter(!is.na(normal_advanced))
+      dplyr::filter(!is.na(normal_advanced))
     ```
 
 -   **`data2x02_hrs:`** it can be assumed that the number of hours spent on DATA2x02 is proportional to the total number of study hours, and that the proportion is roughly equal for all students. The mean proportion of data2x02_hrs / study_hrs is equal to `r sapply(df[df$study_hrs != 0,"data2x02_hrs"]/df[df$study_hrs != 0, "study_hrs"], mean, na.rm=TRUE)`.
@@ -429,14 +429,14 @@ Now I need to deal with any potential `NA` values in the study categories (study
     prop_data2x02 = sapply(df[df$study_hrs != 0,"data2x02_hrs"]/df[df$study_hrs != 0, "study_hrs"], mean, na.rm=TRUE)
 
     df <- df |>
-      mutate(data2x02_hrs = if_else(is.na(data2x02_hrs), true=prop_data2x02*study_hrs, false=data2x02_hrs))
+      dplyr::mutate(data2x02_hrs = dplyr::if_else(is.na(data2x02_hrs), true=prop_data2x02*study_hrs, false=data2x02_hrs))
     ```
 
 -   **`wam:`** this variable is difficult to predict based on the data given, so rows containing `NA` values here will be removed from the dataframe.
 
     ```{r}
     df <- df |>
-      filter(!is.na(wam))
+      dplyr::filter(!is.na(wam))
     ```
 
 ### NAs in Sport
@@ -449,20 +449,20 @@ There are only a few NA values in the sport section.
 
     ```{r}
     df <- df |>
-      mutate(sport = replace_na(sport, "I Don't Play any Sport"))
+      dplyr::mutate(sport = tidyr::replace_na(sport, "I Don't Play any Sport"))
     ```
 
 -   **`exercise_hrs:`** let's look at the NAs in this column. `r filter(df, is.na(exercise_hrs))`
 
     ```{r}
-    filter(df, is.na(exercise_hrs))
+    dplyr::filter(df, is.na(exercise_hrs))
     ```
 
     These NAs are too complex to predict. Hence, I will remove them from the dataframe.
 
     ```{r}
     df <- df |>
-      filter(!is.na(exercise_hrs))
+      dplyr::filter(!is.na(exercise_hrs))
     ```
 
 # Hypothesis Tests
@@ -550,7 +550,7 @@ d2902_wam = unlist(df[df$normal_advanced == "DATA2902", "wam"])
 d2002_wam = unlist(df[df$normal_advanced == "DATA2002", "wam"])
 
 # Looks at d2902_wam - d2002_wam
-t_test = t.test(d2902_wam, d2002_wam, alternative="greater", paired=FALSE, var.equal=FALSE, correct=FALSE, conf.level = 0.95)
+t_test = stats::t.test(d2902_wam, d2002_wam, alternative="greater", paired=FALSE, var.equal=FALSE, correct=FALSE, conf.level = 0.95)
 ```
 
 1.  **Hypothesis:** Let $\mu_\text{Adv}$ be the mean WAM of *DATA2902* students, and $\mu_\text{Nml}$ be the mean WAM of *DATA2002* students. The null hypothesis is $H_0: \mu_\text{Adv} = \mu_\text{Nml}$ and the alternative hypothesis $H_1: \mu_\text{Adv} > \mu_\text{Nml}$.
@@ -574,10 +574,8 @@ We can attempt to visualize a correlation by looking at the data among those who
 #| label: fig-histscat
 #| fig-cap: "(A) Scatter Plot of WAM and Employment Hours and (B) Histogram of Employment Hours"
 
-library(patchwork)
-
 df_work <- df |>
-  filter(employment_hrs != 0)
+  dplyr::filter(employment_hrs != 0)
 
 # Define vector for filling each histogram based on normal_advanced value
 colors = rep(0,length(df_work$normal_advanced))
@@ -616,8 +614,9 @@ p2 <- ggplot(df_work) +
   guides(color=FALSE)
 
 # requires "patchwork" package
-p1 + p2 + plot_layout(guides = 'collect') +
-  plot_annotation(tag_levels = 'A')
+library(patchwork)
+p1 + p2 + patchwork::plot_layout(guides = 'collect') +
+  patchwork::plot_annotation(tag_levels = 'A')
 ```
 
 The visualizations show that generally students with higher WAMs tend to work fewer hours, with a more negative correlation among DATA2902 students. We also see that the distribution of Employment Hours among each stream is identical but neither normal nor symmetric. We will use a Wilcoxon rank-sum test here.
@@ -630,15 +629,14 @@ r = rank(c(x, y))
 w_sum = c("W" = sum(r[1:length(x)]))
 min_w = length(x)*(length(x)+1)/2
 
-w_sum
-2*pwilcox(w_sum - min_w - 1, length(x), length(y), lower.tail=FALSE)
+p_val = 2*stats::pwilcox(w_sum - min_w - 1, length(x), length(y), lower.tail=FALSE)
 ```
 
 1.  **Hypothesis:** Let $\mu_\text{Adv}$ be the mean hours worked for *DATA2902* students, and $\mu_\text{Nml}$ be the mean hours worked for *DATA2002* students. The null hypothesis is $H_0: \mu_\text{Adv} = \mu_\text{Nml}$ and the alternative hypothesis $H_1: \mu_\text{Adv} \neq \mu_\text{Nml}$.
 2.  **Assumptions:** the two populations are independent and follow the same distribution but differ by a shift (@fig-histscat ).
 3.  **Test statistic:** $W = R_1 + R_2 +\ ...\ + R_{33}$ where \$R_i\\in \\text{ranks}(X\_\\text{Adv})\$. Under \$H_0\$, $W$ follows the $WRS(n_\text{Adv}, n_\text{Nml})$ distribution.
 4.  **Observed test statistic:** $w=$ `r w_sum`
-5.  **p-value:** $2P(W\geq$ `r w_sum` $) < 0.05$
+5.  **p-value:** $2P(W\geq$ `r w_sum` $) =$ `r signif(p_val,3)` $< 0.05$
 6.  **Decision:** Since the p-value is less than 0.05, we reject the null hypothesis in favour of the alternative hypothesis. Hence, we conclude that *DATA2902* students do not work the same number of hours as *DATA2002* students. Moreover, @tbl-employmentsummary shows that *DATA2902* students work more hours than *DATA2902* hours, on average.
 
 ```{r}
@@ -700,7 +698,7 @@ As many of the entries in this table contain values that are less than five, I w
 ```{r, warning=FALSE}
 set.seed(2022)
 sport_data = as.matrix(cont_table)
-chi_test = chisq.test(sport_data, simulate.p.value=TRUE, B=10000)
+chi_test = stats::chisq.test(sport_data, simulate.p.value=TRUE, B=10000)
 ```
 
 1.  **Hypothesis:** $H_0: p_{ij} = p_{\bullet j} = y_{\bullet j}/n$ and $H_1: p_{ij}\neq p_{\bullet j}$.
@@ -714,7 +712,7 @@ chi_test = chisq.test(sport_data, simulate.p.value=TRUE, B=10000)
 
 Despite all of the cleaning and analysis above, there is still one elephant in the room; the DATA2x02 students who responded to the survey are not representative of the entire DATA2002 cohort. This opens the conclusions drawn in this report to be influenced by many biases, such as non-response/self-selection bias which inherently induces an under-coverage of the DATA2x02 cohort.
 
-Fortunately, it appears as if these biases have not had a large impact on factors such as WAM. For example, the average WAM across the entire responding cohort is `r signif(mean(df$wam), 2` which is approximately equal to the current average WAM at the University of Sydney (see [this](https://imgur.com/a/TFZzTZv) semester average mark distribution across the USYD faculty of engineering in 2018).
+Fortunately, it appears as if these biases have not had a large impact on factors such as WAM. For example, the average WAM across the entire responding cohort is `r signif(mean(df$wam), 2)` which is approximately equal to the current average WAM at the University of Sydney (see [this](https://imgur.com/a/TFZzTZv) semester average mark distribution across the USYD faculty of engineering in 2018).
 
 Moreover, while these biases may have had a net impact over the entire cohort of responders, by comparing and contrasting the summary statistics of two groups of responders, we reduce the potential impact of any bias. Hence, the aim of this report still has integrity in stating that:
 

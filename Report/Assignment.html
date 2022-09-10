@@ -3826,10 +3826,7 @@ window.onload = function() {
   <li><a href="#are-hours-worked-statistically-different-at-the-p-0.05-level-between-data2902-and-data2002-students" id="toc-are-hours-worked-statistically-different-at-the-p-0.05-level-between-data2902-and-data2002-students" class="nav-link" data-scroll-target="#are-hours-worked-statistically-different-at-the-p-0.05-level-between-data2902-and-data2002-students"> <span class="header-section-number">6.2</span> 2. Are hours worked statistically different at the p &lt; 0.05 level between <em>DATA2902</em> and <em>DATA2002</em> students?</a></li>
   <li><a href="#do-data2902-students-participate-in-different-sports-at-a-statistically-different-proportion-compared-to-data2002-students" id="toc-do-data2902-students-participate-in-different-sports-at-a-statistically-different-proportion-compared-to-data2002-students" class="nav-link" data-scroll-target="#do-data2902-students-participate-in-different-sports-at-a-statistically-different-proportion-compared-to-data2002-students"> <span class="header-section-number">6.3</span> 3. Do DATA2902 students participate in different sports at a statistically different proportion compared to DATA2002 students?</a></li>
   </ul></li>
-  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results"> <span class="header-section-number">7</span> Results</a>
-  <ul class="collapse">
-  <li><a href="#limitations-of-investigation" id="toc-limitations-of-investigation" class="nav-link" data-scroll-target="#limitations-of-investigation"> <span class="header-section-number">7.1</span> Limitations of Investigation</a></li>
-  </ul></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results"> <span class="header-section-number">7</span> Results</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"> <span class="header-section-number">8</span> References</a></li>
   </ul>
 </nav>
@@ -4002,7 +3999,7 @@ How much time do you usually spend on DATA2x02 each week? …
 </section>
 <section id="version-packages-and-cleaning" class="level1" data-number="2">
 <h1 data-number="2"><span class="header-section-number">2</span> Version, Packages and Cleaning</h1>
-<p>The calculations in this report were performed in R <span class="citation" data-cites="R-base">(<a href="#ref-R-base" role="doc-biblioref">R Core Team 2022</a>)</span> within the Quarto environment <span class="citation" data-cites="quarto">(<a href="#ref-quarto" role="doc-biblioref">Allaire. et al. 2021</a>)</span> for reproducibility. Data wrangling was performed in base R and the tidyverse <span class="citation" data-cites="tidyverse2019">(<a href="#ref-tidyverse2019" role="doc-biblioref">Wickham et al. 2019</a>)</span> with a single use of naniar <span class="citation" data-cites="naniar">(<a href="#ref-naniar" role="doc-biblioref">Tierney 2021</a>)</span>. Graphs were produced with ggplot2 <span class="citation" data-cites="tidyverse2019">(<a href="#ref-tidyverse2019" role="doc-biblioref">Wickham et al. 2019</a>)</span>.</p>
+<p>The calculations in this report were performed in R <span class="citation" data-cites="R-base">(<a href="#ref-R-base" role="doc-biblioref">R Core Team 2022</a>)</span> within the Quarto environment <span class="citation" data-cites="quarto">(<a href="#ref-quarto" role="doc-biblioref">Allaire. et al. 2021</a>)</span> for reproducibility. Data wrangling was performed in base R and the tidyverse <span class="citation" data-cites="tidyverse2019">(<a href="#ref-tidyverse2019" role="doc-biblioref">Wickham et al. 2019</a>)</span> with a single use of naniar <span class="citation" data-cites="naniar">(<a href="#ref-naniar" role="doc-biblioref">Tierney 2021</a>)</span>. Graphs were produced with ggplot2 <span class="citation" data-cites="tidyverse2019">(<a href="#ref-tidyverse2019" role="doc-biblioref">Wickham et al. 2019</a>)</span>. Each code chunk in this report features <code>package_name::</code> before every non-base and non-ggplot2 function that is used.</p>
 <p>Names of the variables were shortened. Extreme values were treated individually; either the entire entry was removed, or the extreme value was replaced with some aggregate. To conserve as much data as possible, missing values were replaced with aggregates where viable.</p>
 </section>
 <section id="aim" class="level1" data-number="3">
@@ -4058,20 +4055,20 @@ How much time do you usually spend on DATA2x02 each week? …
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(df) <span class="ot">=</span> new_names</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># combine old and new into a data frame:</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>name_combo <span class="ot">=</span> <span class="fu">bind_cols</span>(<span class="at">New =</span> new_names, <span class="at">Old =</span> old_names)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>name_combo <span class="ot">=</span> dplyr<span class="sc">::</span><span class="fu">bind_cols</span>(<span class="at">New =</span> new_names, <span class="at">Old =</span> old_names)</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>important_vars <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;timestamp&quot;</span>, <span class="st">&quot;study_hrs&quot;</span>, <span class="st">&quot;study_load&quot;</span>, <span class="st">&quot;work&quot;</span>, <span class="st">&quot;normal_advanced&quot;</span>, <span class="st">&quot;exercise_hrs&quot;</span>, <span class="st">&quot;employment_hrs&quot;</span>, <span class="st">&quot;weekly_saving&quot;</span>, <span class="st">&quot;data2x02_hrs&quot;</span>, <span class="st">&quot;sport&quot;</span>, <span class="st">&quot;wam&quot;</span>)</span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>name_combo <span class="sc">|&gt;</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(name_combo<span class="sc">$</span>New <span class="sc">%in%</span> important_vars) <span class="sc">|&gt;</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(name_combo<span class="sc">$</span>New <span class="sc">%in%</span> important_vars) <span class="sc">|&gt;</span></span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  gt<span class="sc">::</span><span class="fu">gt</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 
-<div id="zuzrsnrkzi" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="rwfjqhpuka" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#zuzrsnrkzi .gt_table {
+#rwfjqhpuka .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -4096,7 +4093,7 @@ How much time do you usually spend on DATA2x02 each week? …
   border-left-color: #D3D3D3;
 }
 
-#zuzrsnrkzi .gt_heading {
+#rwfjqhpuka .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -4108,7 +4105,7 @@ How much time do you usually spend on DATA2x02 each week? …
   border-right-color: #D3D3D3;
 }
 
-#zuzrsnrkzi .gt_title {
+#rwfjqhpuka .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -4120,7 +4117,7 @@ How much time do you usually spend on DATA2x02 each week? …
   border-bottom-width: 0;
 }
 
-#zuzrsnrkzi .gt_subtitle {
+#rwfjqhpuka .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -4132,13 +4129,13 @@ How much time do you usually spend on DATA2x02 each week? …
   border-top-width: 0;
 }
 
-#zuzrsnrkzi .gt_bottom_border {
+#rwfjqhpuka .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#zuzrsnrkzi .gt_col_headings {
+#rwfjqhpuka .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -4153,7 +4150,7 @@ How much time do you usually spend on DATA2x02 each week? …
   border-right-color: #D3D3D3;
 }
 
-#zuzrsnrkzi .gt_col_heading {
+#rwfjqhpuka .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -4173,7 +4170,7 @@ How much time do you usually spend on DATA2x02 each week? …
   overflow-x: hidden;
 }
 
-#zuzrsnrkzi .gt_column_spanner_outer {
+#rwfjqhpuka .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -4185,15 +4182,15 @@ How much time do you usually spend on DATA2x02 each week? …
   padding-right: 4px;
 }
 
-#zuzrsnrkzi .gt_column_spanner_outer:first-child {
+#rwfjqhpuka .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#zuzrsnrkzi .gt_column_spanner_outer:last-child {
+#rwfjqhpuka .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#zuzrsnrkzi .gt_column_spanner {
+#rwfjqhpuka .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -4205,7 +4202,7 @@ How much time do you usually spend on DATA2x02 each week? …
   width: 100%;
 }
 
-#zuzrsnrkzi .gt_group_heading {
+#rwfjqhpuka .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4230,7 +4227,7 @@ How much time do you usually spend on DATA2x02 each week? …
   vertical-align: middle;
 }
 
-#zuzrsnrkzi .gt_empty_group_heading {
+#rwfjqhpuka .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -4245,15 +4242,15 @@ How much time do you usually spend on DATA2x02 each week? …
   vertical-align: middle;
 }
 
-#zuzrsnrkzi .gt_from_md > :first-child {
+#rwfjqhpuka .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#zuzrsnrkzi .gt_from_md > :last-child {
+#rwfjqhpuka .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#zuzrsnrkzi .gt_row {
+#rwfjqhpuka .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4272,7 +4269,7 @@ How much time do you usually spend on DATA2x02 each week? …
   overflow-x: hidden;
 }
 
-#zuzrsnrkzi .gt_stub {
+#rwfjqhpuka .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -4285,7 +4282,7 @@ How much time do you usually spend on DATA2x02 each week? …
   padding-right: 5px;
 }
 
-#zuzrsnrkzi .gt_stub_row_group {
+#rwfjqhpuka .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -4299,11 +4296,11 @@ How much time do you usually spend on DATA2x02 each week? …
   vertical-align: top;
 }
 
-#zuzrsnrkzi .gt_row_group_first td {
+#rwfjqhpuka .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#zuzrsnrkzi .gt_summary_row {
+#rwfjqhpuka .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -4313,16 +4310,16 @@ How much time do you usually spend on DATA2x02 each week? …
   padding-right: 5px;
 }
 
-#zuzrsnrkzi .gt_first_summary_row {
+#rwfjqhpuka .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#zuzrsnrkzi .gt_first_summary_row.thick {
+#rwfjqhpuka .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#zuzrsnrkzi .gt_last_summary_row {
+#rwfjqhpuka .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4332,7 +4329,7 @@ How much time do you usually spend on DATA2x02 each week? …
   border-bottom-color: #D3D3D3;
 }
 
-#zuzrsnrkzi .gt_grand_summary_row {
+#rwfjqhpuka .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -4342,7 +4339,7 @@ How much time do you usually spend on DATA2x02 each week? …
   padding-right: 5px;
 }
 
-#zuzrsnrkzi .gt_first_grand_summary_row {
+#rwfjqhpuka .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4352,11 +4349,11 @@ How much time do you usually spend on DATA2x02 each week? …
   border-top-color: #D3D3D3;
 }
 
-#zuzrsnrkzi .gt_striped {
+#rwfjqhpuka .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#zuzrsnrkzi .gt_table_body {
+#rwfjqhpuka .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -4365,7 +4362,7 @@ How much time do you usually spend on DATA2x02 each week? …
   border-bottom-color: #D3D3D3;
 }
 
-#zuzrsnrkzi .gt_footnotes {
+#rwfjqhpuka .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -4379,7 +4376,7 @@ How much time do you usually spend on DATA2x02 each week? …
   border-right-color: #D3D3D3;
 }
 
-#zuzrsnrkzi .gt_footnote {
+#rwfjqhpuka .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -4388,7 +4385,7 @@ How much time do you usually spend on DATA2x02 each week? …
   padding-right: 5px;
 }
 
-#zuzrsnrkzi .gt_sourcenotes {
+#rwfjqhpuka .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -4402,7 +4399,7 @@ How much time do you usually spend on DATA2x02 each week? …
   border-right-color: #D3D3D3;
 }
 
-#zuzrsnrkzi .gt_sourcenote {
+#rwfjqhpuka .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -4410,80 +4407,73 @@ How much time do you usually spend on DATA2x02 each week? …
   padding-right: 5px;
 }
 
-#zuzrsnrkzi .gt_left {
+#rwfjqhpuka .gt_left {
   text-align: left;
 }
 
-#zuzrsnrkzi .gt_center {
+#rwfjqhpuka .gt_center {
   text-align: center;
 }
 
-#zuzrsnrkzi .gt_right {
+#rwfjqhpuka .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#zuzrsnrkzi .gt_font_normal {
+#rwfjqhpuka .gt_font_normal {
   font-weight: normal;
 }
 
-#zuzrsnrkzi .gt_font_bold {
+#rwfjqhpuka .gt_font_bold {
   font-weight: bold;
 }
 
-#zuzrsnrkzi .gt_font_italic {
+#rwfjqhpuka .gt_font_italic {
   font-style: italic;
 }
 
-#zuzrsnrkzi .gt_super {
+#rwfjqhpuka .gt_super {
   font-size: 65%;
 }
 
-#zuzrsnrkzi .gt_two_val_uncert {
-  display: inline-block;
-  line-height: 1em;
-  text-align: right;
-  font-size: 60%;
-  vertical-align: -0.25em;
-  margin-left: 0.1em;
-}
-
-#zuzrsnrkzi .gt_footnote_marks {
+#rwfjqhpuka .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#zuzrsnrkzi .gt_asterisk {
+#rwfjqhpuka .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#zuzrsnrkzi .gt_slash_mark {
-  font-size: 0.7em;
-  line-height: 0.7em;
-  vertical-align: 0.15em;
+#rwfjqhpuka .gt_indent_1 {
+  text-indent: 5px;
 }
 
-#zuzrsnrkzi .gt_fraction_numerator {
-  font-size: 0.6em;
-  line-height: 0.6em;
-  vertical-align: 0.45em;
+#rwfjqhpuka .gt_indent_2 {
+  text-indent: 10px;
 }
 
-#zuzrsnrkzi .gt_fraction_denominator {
-  font-size: 0.6em;
-  line-height: 0.6em;
-  vertical-align: -0.05em;
+#rwfjqhpuka .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#rwfjqhpuka .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#rwfjqhpuka .gt_indent_5 {
+  text-indent: 25px;
 }
 </style>
 <table class="gt_table">
   
   <thead class="gt_col_headings">
     <tr>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">New</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Old</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col">New</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col">Old</th>
     </tr>
   </thead>
   <tbody class="gt_table_body">
@@ -4519,7 +4509,7 @@ How much time do you usually spend on DATA2x02 each week? …
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># subset dataframe and create unique identifier for each entry</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">=</span> df <span class="sc">|&gt;</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">identifier =</span> <span class="fu">row_number</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">identifier =</span> <span class="fu">row_number</span>()) <span class="sc">|&gt;</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">subset</span>(<span class="at">select=</span><span class="fu">c</span>(<span class="st">&quot;identifier&quot;</span>, important_vars[important_vars <span class="sc">!=</span> <span class="st">&quot;timestamp&quot;</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
@@ -4529,12 +4519,12 @@ How much time do you usually spend on DATA2x02 each week? …
 <div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(df<span class="sc">$</span>study_hrs, <span class="at">main=</span><span class="st">&quot;&quot;</span>, <span class="at">xlab=</span><span class="fu">as.character</span>(name_combo[name_combo<span class="sc">$</span>New <span class="sc">==</span> <span class="st">&quot;study_hrs&quot;</span>,<span class="dv">2</span>]))</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(df<span class="sc">$</span>exercise_hrs, <span class="at">main=</span><span class="st">&quot;&quot;</span>, <span class="at">xlab=</span><span class="fu">as.character</span>(name_combo[name_combo<span class="sc">$</span>New <span class="sc">==</span> <span class="st">&quot;exercise_hrs&quot;</span>,<span class="dv">2</span>]))</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(df<span class="sc">$</span>employment_hrs, <span class="at">main=</span><span class="st">&quot;&quot;</span>, <span class="at">xlab=</span><span class="fu">as.character</span>(name_combo[name_combo<span class="sc">$</span>New <span class="sc">==</span> <span class="st">&quot;employment_hrs&quot;</span>,<span class="dv">2</span>]))</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(df<span class="sc">$</span>weekly_saving, <span class="at">main=</span><span class="st">&quot;&quot;</span>, <span class="at">xlab=</span><span class="fu">as.character</span>(name_combo[name_combo<span class="sc">$</span>New <span class="sc">==</span> <span class="st">&quot;weekly_saving&quot;</span>,<span class="dv">2</span>]))</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(df<span class="sc">$</span>data2x02_hrs, <span class="at">main=</span><span class="st">&quot;&quot;</span>, <span class="at">xlab=</span><span class="fu">as.character</span>(name_combo[name_combo<span class="sc">$</span>New <span class="sc">==</span> <span class="st">&quot;data2x02_hrs&quot;</span>,<span class="dv">2</span>]))</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(df<span class="sc">$</span>wam, <span class="at">main=</span><span class="st">&quot;&quot;</span>, <span class="at">xlab=</span><span class="fu">as.character</span>(name_combo[name_combo<span class="sc">$</span>New <span class="sc">==</span> <span class="st">&quot;wam&quot;</span>,<span class="dv">2</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>graphics<span class="sc">::</span><span class="fu">hist</span>(df<span class="sc">$</span>study_hrs, <span class="at">main=</span><span class="st">&quot;&quot;</span>, <span class="at">xlab=</span><span class="fu">as.character</span>(name_combo[name_combo<span class="sc">$</span>New <span class="sc">==</span> <span class="st">&quot;study_hrs&quot;</span>,<span class="dv">2</span>]))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>graphics<span class="sc">::</span><span class="fu">hist</span>(df<span class="sc">$</span>exercise_hrs, <span class="at">main=</span><span class="st">&quot;&quot;</span>, <span class="at">xlab=</span><span class="fu">as.character</span>(name_combo[name_combo<span class="sc">$</span>New <span class="sc">==</span> <span class="st">&quot;exercise_hrs&quot;</span>,<span class="dv">2</span>]))</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>graphics<span class="sc">::</span><span class="fu">hist</span>(df<span class="sc">$</span>employment_hrs, <span class="at">main=</span><span class="st">&quot;&quot;</span>, <span class="at">xlab=</span><span class="fu">as.character</span>(name_combo[name_combo<span class="sc">$</span>New <span class="sc">==</span> <span class="st">&quot;employment_hrs&quot;</span>,<span class="dv">2</span>]))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>graphics<span class="sc">::</span><span class="fu">hist</span>(df<span class="sc">$</span>weekly_saving, <span class="at">main=</span><span class="st">&quot;&quot;</span>, <span class="at">xlab=</span><span class="fu">as.character</span>(name_combo[name_combo<span class="sc">$</span>New <span class="sc">==</span> <span class="st">&quot;weekly_saving&quot;</span>,<span class="dv">2</span>]))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>graphics<span class="sc">::</span><span class="fu">hist</span>(df<span class="sc">$</span>data2x02_hrs, <span class="at">main=</span><span class="st">&quot;&quot;</span>, <span class="at">xlab=</span><span class="fu">as.character</span>(name_combo[name_combo<span class="sc">$</span>New <span class="sc">==</span> <span class="st">&quot;data2x02_hrs&quot;</span>,<span class="dv">2</span>]))</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>graphics<span class="sc">::</span><span class="fu">hist</span>(df<span class="sc">$</span>wam, <span class="at">main=</span><span class="st">&quot;&quot;</span>, <span class="at">xlab=</span><span class="fu">as.character</span>(name_combo[name_combo<span class="sc">$</span>New <span class="sc">==</span> <span class="st">&quot;wam&quot;</span>,<span class="dv">2</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="fig-quantitativehists" class="cell quarto-layout-panel">
 <figure class="figure">
@@ -4627,10 +4617,10 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">exercise_hrs =</span> <span class="fu">replace</span>(exercise_hrs, exercise_hrs<span class="sc">==</span><span class="dv">168</span>, <span class="cn">NA</span>))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">exercise_hrs =</span> <span class="fu">replace</span>(exercise_hrs, exercise_hrs<span class="sc">==</span><span class="dv">168</span>, <span class="cn">NA</span>))</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(identifier <span class="sc">==</span> <span class="st">&quot;69&quot;</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span>(identifier <span class="sc">==</span> <span class="st">&quot;69&quot;</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div></li>
 <li><p><strong><code>employment_hrs:</code></strong> A closer investigation on the row with greater than 50 employment hours gives fairly realistic results, including fewer study hours and more weekly savings to accommodate for the lager number of employment hours. Hence, this row will not be mutated.</p>
@@ -4656,8 +4646,8 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(identifier <span class="sc">!=</span> <span class="st">&quot;11&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(identifier <span class="sc">!=</span> <span class="st">&quot;187&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(identifier <span class="sc">!=</span> <span class="st">&quot;11&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(identifier <span class="sc">!=</span> <span class="st">&quot;187&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Note that the <code>187</code> identifier was the only outlier in the distribution for DATA2x02 study hours, so we do not need to remove any more outliers from <code>data2x02_hrs</code>.</p></li>
@@ -4666,7 +4656,7 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">wam =</span> <span class="fu">replace</span>(wam, wam<span class="sc">&lt;</span><span class="dv">10</span>, <span class="cn">NA</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">wam =</span> <span class="fu">replace</span>(wam, wam<span class="sc">&lt;</span><span class="dv">10</span>, <span class="cn">NA</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div></li>
 </ul>
@@ -4705,12 +4695,12 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Replace work value with &quot;I don&#39;t currently work&quot; if 0 employment_hours and </span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># work is NA.</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">work =</span> <span class="fu">if_else</span>(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">work =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(</span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">is.na</span>(work) <span class="sc">&amp;</span> employment_hrs <span class="sc">==</span> <span class="dv">0</span>,</span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">true=</span><span class="st">&quot;I don&#39;t currently work&quot;</span>,</span>
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">false=</span>work)) <span class="sc">|&gt;</span></span>
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Filter to remove rows which contain NA values for work and employment_hrs</span></span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(<span class="fu">is.na</span>(work) <span class="sc">&amp;</span> <span class="fu">is.na</span>(employment_hrs)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span>(<span class="fu">is.na</span>(work) <span class="sc">&amp;</span> <span class="fu">is.na</span>(employment_hrs)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Similarly, looking at the “I don’t currently work” category in <code>work</code>, some individuals have written nonzero values for <code>employment_hrs</code>.</p>
@@ -4725,7 +4715,7 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">employment_hrs =</span> <span class="fu">if_else</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">employment_hrs =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    work<span class="sc">==</span><span class="st">&quot;I don&#39;t currently work&quot;</span>,</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">true=</span><span class="dv">0</span>,</span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">false=</span>employment_hrs)</span>
@@ -4737,7 +4727,7 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">employment_hrs =</span> <span class="fu">case_when</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">employment_hrs =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">is.na</span>(employment_hrs) <span class="sc">&amp;</span> work <span class="sc">==</span> <span class="st">&quot;Full time&quot;</span> <span class="sc">~</span> <span class="fu">sapply</span>(df[df<span class="sc">$</span>work<span class="sc">==</span><span class="st">&quot;Full time&quot;</span>,</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                                                       <span class="st">&quot;employment_hrs&quot;</span>],</span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>                                                       mean,</span>
@@ -4778,7 +4768,7 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">weekly_saving =</span> <span class="fu">case_when</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">weekly_saving =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">is.na</span>(weekly_saving) <span class="sc">&amp;</span> work <span class="sc">==</span> <span class="st">&quot;Full time&quot;</span> <span class="sc">~</span> <span class="fu">sapply</span>(df[df<span class="sc">$</span>work<span class="sc">==</span><span class="st">&quot;Full time&quot;</span>,</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>                                                       <span class="st">&quot;weekly_saving&quot;</span>],</span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>                                                       mean,</span>
@@ -4832,7 +4822,7 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">study_hrs =</span> <span class="fu">case_when</span>(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">study_hrs =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">is.na</span>(study_hrs) <span class="sc">&amp;</span> study_load <span class="sc">==</span> <span class="st">&quot;Full time&quot;</span> <span class="sc">~</span> <span class="fu">sapply</span>(df[df<span class="sc">$</span>study_load<span class="sc">==</span><span class="st">&quot;Full time&quot;</span>,</span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>                                                       <span class="st">&quot;study_hrs&quot;</span>],</span>
 <span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>                                                       mean,</span>
@@ -4853,7 +4843,7 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(normal_advanced))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(normal_advanced))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div></li>
 <li><p><strong><code>data2x02_hrs:</code></strong> it can be assumed that the number of hours spent on DATA2x02 is proportional to the total number of study hours, and that the proportion is roughly equal for all students. The mean proportion of data2x02_hrs / study_hrs is equal to 0.3861489.</p>
@@ -4863,7 +4853,7 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>prop_data2x02 <span class="ot">=</span> <span class="fu">sapply</span>(df[df<span class="sc">$</span>study_hrs <span class="sc">!=</span> <span class="dv">0</span>,<span class="st">&quot;data2x02_hrs&quot;</span>]<span class="sc">/</span>df[df<span class="sc">$</span>study_hrs <span class="sc">!=</span> <span class="dv">0</span>, <span class="st">&quot;study_hrs&quot;</span>], mean, <span class="at">na.rm=</span><span class="cn">TRUE</span>)</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">data2x02_hrs =</span> <span class="fu">if_else</span>(<span class="fu">is.na</span>(data2x02_hrs), <span class="at">true=</span>prop_data2x02<span class="sc">*</span>study_hrs, <span class="at">false=</span>data2x02_hrs))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">data2x02_hrs =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(<span class="fu">is.na</span>(data2x02_hrs), <span class="at">true=</span>prop_data2x02<span class="sc">*</span>study_hrs, <span class="at">false=</span>data2x02_hrs))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div></li>
 <li><p><strong><code>wam:</code></strong> this variable is difficult to predict based on the data given, so rows containing <code>NA</code> values here will be removed from the dataframe.</p>
@@ -4871,7 +4861,7 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(wam))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(wam))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div></li>
 </ul>
@@ -4892,7 +4882,7 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sport =</span> <span class="fu">replace_na</span>(sport, <span class="st">&quot;I Don&#39;t Play any Sport&quot;</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">sport =</span> tidyr<span class="sc">::</span><span class="fu">replace_na</span>(sport, <span class="st">&quot;I Don&#39;t Play any Sport&quot;</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div></li>
 <li><p><strong><code>exercise_hrs:</code></strong> let’s look at the NAs in this column.</p>
@@ -4905,7 +4895,7 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span>(df, <span class="fu">is.na</span>(exercise_hrs))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>dplyr<span class="sc">::</span><span class="fu">filter</span>(df, <span class="fu">is.na</span>(exercise_hrs))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 
@@ -4921,7 +4911,7 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(exercise_hrs))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(exercise_hrs))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div></li>
 </ul>
@@ -5046,7 +5036,7 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>d2002_wam <span class="ot">=</span> <span class="fu">unlist</span>(df[df<span class="sc">$</span>normal_advanced <span class="sc">==</span> <span class="st">&quot;DATA2002&quot;</span>, <span class="st">&quot;wam&quot;</span>])</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Looks at d2902_wam - d2002_wam</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>t_test <span class="ot">=</span> <span class="fu">t.test</span>(d2902_wam, d2002_wam, <span class="at">alternative=</span><span class="st">&quot;greater&quot;</span>, <span class="at">paired=</span><span class="cn">FALSE</span>, <span class="at">var.equal=</span><span class="cn">FALSE</span>, <span class="at">correct=</span><span class="cn">FALSE</span>, <span class="at">conf.level =</span> <span class="fl">0.95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>t_test <span class="ot">=</span> stats<span class="sc">::</span><span class="fu">t.test</span>(d2902_wam, d2002_wam, <span class="at">alternative=</span><span class="st">&quot;greater&quot;</span>, <span class="at">paired=</span><span class="cn">FALSE</span>, <span class="at">var.equal=</span><span class="cn">FALSE</span>, <span class="at">correct=</span><span class="cn">FALSE</span>, <span class="at">conf.level =</span> <span class="fl">0.95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <ol type="1">
@@ -5067,50 +5057,49 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <div class="cell" data-fig.asp="0.5">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>df_work <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(employment_hrs <span class="sc">!=</span> <span class="dv">0</span>)</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Define vector for filling each histogram based on normal_advanced value</span></span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>colors <span class="ot">=</span> <span class="fu">rep</span>(<span class="dv">0</span>,<span class="fu">length</span>(df_work<span class="sc">$</span>normal_advanced))</span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>colors[df_work<span class="sc">$</span>normal_advanced <span class="sc">==</span> <span class="st">&quot;DATA2902&quot;</span>] <span class="ot">=</span> <span class="st">&#39;red&#39;</span></span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>colors[df_work<span class="sc">$</span>normal_advanced <span class="sc">==</span> <span class="st">&quot;DATA2002&quot;</span>] <span class="ot">=</span> <span class="st">&#39;blue&#39;</span></span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Define dataframe containing average employment hours of DATA2902 and DATA2002 students</span></span>
-<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>avg_2x02 <span class="ot">&lt;-</span> plyr<span class="sc">::</span><span class="fu">ddply</span>(df_work, <span class="st">&quot;normal_advanced&quot;</span>, summarise, <span class="at">avg=</span><span class="fu">mean</span>(employment_hrs))</span>
-<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Produce</span></span>
-<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df_work) <span class="sc">+</span> </span>
-<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># add the aesthetics</span></span>
-<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> wam, </span>
-<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> employment_hrs,</span>
-<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">colour =</span> normal_advanced) <span class="sc">+</span></span>
-<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># add a geometry</span></span>
-<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
-<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">&#39;lm&#39;</span>) <span class="sc">+</span> </span>
-<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># tidy up the labels</span></span>
-<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Weighted Average Mark (WAM)&quot;</span>,</span>
-<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Employment Hours&quot;</span>,</span>
-<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a>       <span class="at">colour =</span> <span class="st">&quot;Stream&quot;</span>) </span>
-<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Produce histograms. All functions below are from the ggplot2 package.</span></span>
-<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df_work) <span class="sc">+</span></span>
-<span id="cb27-31"><a href="#cb27-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x=</span>employment_hrs, <span class="at">fill=</span>normal_advanced) <span class="sc">+</span></span>
-<span id="cb27-32"><a href="#cb27-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">y =</span> ..density..),</span>
-<span id="cb27-33"><a href="#cb27-33" aria-hidden="true" tabindex="-1"></a>                 <span class="at">color=</span><span class="st">&quot;#e9ecef&quot;</span>,</span>
-<span id="cb27-34"><a href="#cb27-34" aria-hidden="true" tabindex="-1"></a>                 <span class="at">alpha=</span><span class="fl">0.7</span>,</span>
-<span id="cb27-35"><a href="#cb27-35" aria-hidden="true" tabindex="-1"></a>                ) <span class="sc">+</span></span>
-<span id="cb27-36"><a href="#cb27-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha=</span><span class="fl">0.3</span>) <span class="sc">+</span></span>
-<span id="cb27-37"><a href="#cb27-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">data=</span>avg_2x02, <span class="fu">aes</span>(<span class="at">xintercept=</span>avg, <span class="at">color=</span>normal_advanced),</span>
-<span id="cb27-38"><a href="#cb27-38" aria-hidden="true" tabindex="-1"></a>             <span class="at">linetype=</span><span class="st">&quot;dashed&quot;</span>) <span class="sc">+</span> </span>
-<span id="cb27-39"><a href="#cb27-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">&quot;Employment Hours&quot;</span>, <span class="at">y=</span><span class="st">&quot;Proportion in D2x02 Group&quot;</span>, <span class="at">fill =</span> <span class="st">&quot;Stream&quot;</span>) <span class="sc">+</span></span>
-<span id="cb27-40"><a href="#cb27-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">color=</span><span class="cn">FALSE</span>)</span>
-<span id="cb27-41"><a href="#cb27-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-42"><a href="#cb27-42" aria-hidden="true" tabindex="-1"></a><span class="co"># requires &quot;patchwork&quot; package</span></span>
-<span id="cb27-43"><a href="#cb27-43" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">+</span> p2 <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">&#39;collect&#39;</span>) <span class="sc">+</span></span>
-<span id="cb27-44"><a href="#cb27-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">&#39;A&#39;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>df_work <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(employment_hrs <span class="sc">!=</span> <span class="dv">0</span>)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define vector for filling each histogram based on normal_advanced value</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>colors <span class="ot">=</span> <span class="fu">rep</span>(<span class="dv">0</span>,<span class="fu">length</span>(df_work<span class="sc">$</span>normal_advanced))</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>colors[df_work<span class="sc">$</span>normal_advanced <span class="sc">==</span> <span class="st">&quot;DATA2902&quot;</span>] <span class="ot">=</span> <span class="st">&#39;red&#39;</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>colors[df_work<span class="sc">$</span>normal_advanced <span class="sc">==</span> <span class="st">&quot;DATA2002&quot;</span>] <span class="ot">=</span> <span class="st">&#39;blue&#39;</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Define dataframe containing average employment hours of DATA2902 and DATA2002 students</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>avg_2x02 <span class="ot">&lt;-</span> plyr<span class="sc">::</span><span class="fu">ddply</span>(df_work, <span class="st">&quot;normal_advanced&quot;</span>, summarise, <span class="at">avg=</span><span class="fu">mean</span>(employment_hrs))</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Produce</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df_work) <span class="sc">+</span> </span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># add the aesthetics</span></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> wam, </span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> employment_hrs,</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">colour =</span> normal_advanced) <span class="sc">+</span></span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># add a geometry</span></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">&#39;lm&#39;</span>) <span class="sc">+</span> </span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># tidy up the labels</span></span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Weighted Average Mark (WAM)&quot;</span>,</span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Employment Hours&quot;</span>,</span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>       <span class="at">colour =</span> <span class="st">&quot;Stream&quot;</span>) </span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Produce histograms. All functions below are from the ggplot2 package.</span></span>
+<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df_work) <span class="sc">+</span></span>
+<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x=</span>employment_hrs, <span class="at">fill=</span>normal_advanced) <span class="sc">+</span></span>
+<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">y =</span> ..density..),</span>
+<span id="cb27-31"><a href="#cb27-31" aria-hidden="true" tabindex="-1"></a>                 <span class="at">color=</span><span class="st">&quot;#e9ecef&quot;</span>,</span>
+<span id="cb27-32"><a href="#cb27-32" aria-hidden="true" tabindex="-1"></a>                 <span class="at">alpha=</span><span class="fl">0.7</span>,</span>
+<span id="cb27-33"><a href="#cb27-33" aria-hidden="true" tabindex="-1"></a>                ) <span class="sc">+</span></span>
+<span id="cb27-34"><a href="#cb27-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha=</span><span class="fl">0.3</span>) <span class="sc">+</span></span>
+<span id="cb27-35"><a href="#cb27-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">data=</span>avg_2x02, <span class="fu">aes</span>(<span class="at">xintercept=</span>avg, <span class="at">color=</span>normal_advanced),</span>
+<span id="cb27-36"><a href="#cb27-36" aria-hidden="true" tabindex="-1"></a>             <span class="at">linetype=</span><span class="st">&quot;dashed&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb27-37"><a href="#cb27-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">&quot;Employment Hours&quot;</span>, <span class="at">y=</span><span class="st">&quot;Proportion in D2x02 Group&quot;</span>, <span class="at">fill =</span> <span class="st">&quot;Stream&quot;</span>) <span class="sc">+</span></span>
+<span id="cb27-38"><a href="#cb27-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">color=</span><span class="cn">FALSE</span>)</span>
+<span id="cb27-39"><a href="#cb27-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-40"><a href="#cb27-40" aria-hidden="true" tabindex="-1"></a><span class="co"># requires &quot;patchwork&quot; package</span></span>
+<span id="cb27-41"><a href="#cb27-41" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb27-42"><a href="#cb27-42" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">+</span> p2 <span class="sc">+</span> patchwork<span class="sc">::</span><span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">&#39;collect&#39;</span>) <span class="sc">+</span></span>
+<span id="cb27-43"><a href="#cb27-43" aria-hidden="true" tabindex="-1"></a>  patchwork<span class="sc">::</span><span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">&#39;A&#39;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-histscat" class="quarto-figure quarto-figure-center anchored">
@@ -5131,8 +5120,7 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>w_sum <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;W&quot;</span> <span class="ot">=</span> <span class="fu">sum</span>(r[<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(x)]))</span>
 <span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>min_w <span class="ot">=</span> <span class="fu">length</span>(x)<span class="sc">*</span>(<span class="fu">length</span>(x)<span class="sc">+</span><span class="dv">1</span>)<span class="sc">/</span><span class="dv">2</span></span>
 <span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>w_sum</span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span><span class="sc">*</span><span class="fu">pwilcox</span>(w_sum <span class="sc">-</span> min_w <span class="sc">-</span> <span class="dv">1</span>, <span class="fu">length</span>(x), <span class="fu">length</span>(y), <span class="at">lower.tail=</span><span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>p_val <span class="ot">=</span> <span class="dv">2</span><span class="sc">*</span>stats<span class="sc">::</span><span class="fu">pwilcox</span>(w_sum <span class="sc">-</span> min_w <span class="sc">-</span> <span class="dv">1</span>, <span class="fu">length</span>(x), <span class="fu">length</span>(y), <span class="at">lower.tail=</span><span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <ol type="1">
@@ -5140,7 +5128,7 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <li><strong>Assumptions:</strong> the two populations are independent and follow the same distribution but differ by a shift (<a href="#fig-histscat">Figure 5</a> ).</li>
 <li><strong>Test statistic:</strong> <span class="math inline">\(W = R_1 + R_2 +\ ...\ + R_{33}\)</span> where $R_i\in \text{ranks}(X_\text{Adv})$. Under $H_0$, <span class="math inline">\(W\)</span> follows the <span class="math inline">\(WRS(n_\text{Adv}, n_\text{Nml})\)</span> distribution.</li>
 <li><strong>Observed test statistic:</strong> <span class="math inline">\(w=\)</span> 2996.5</li>
-<li><strong>p-value:</strong> <span class="math inline">\(2P(W\geq\)</span> 2996.5 <span class="math inline">\() &lt; 0.05\)</span></li>
+<li><strong>p-value:</strong> <span class="math inline">\(2P(W\geq\)</span> 2996.5 <span class="math inline">\() =\)</span> 0.0434 <span class="math inline">\(&lt; 0.05\)</span></li>
 <li><strong>Decision:</strong> Since the p-value is less than 0.05, we reject the null hypothesis in favour of the alternative hypothesis. Hence, we conclude that <em>DATA2902</em> students do not work the same number of hours as <em>DATA2002</em> students. Moreover, <a href="#tbl-employmentsummary">Table 2</a> shows that <em>DATA2902</em> students work more hours than <em>DATA2902</em> hours, on average.</li>
 </ol>
 <div class="cell">
@@ -5340,7 +5328,7 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2022</span>)</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>sport_data <span class="ot">=</span> <span class="fu">as.matrix</span>(cont_table)</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>chi_test <span class="ot">=</span> <span class="fu">chisq.test</span>(sport_data, <span class="at">simulate.p.value=</span><span class="cn">TRUE</span>, <span class="at">B=</span><span class="dv">10000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>chi_test <span class="ot">=</span> stats<span class="sc">::</span><span class="fu">chisq.test</span>(sport_data, <span class="at">simulate.p.value=</span><span class="cn">TRUE</span>, <span class="at">B=</span><span class="dv">10000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <ol type="1">
@@ -5355,15 +5343,29 @@ Let’s investigate the abnormal response of 100,000 hours spent studying per we
 </section>
 <section id="results" class="level1" data-number="7">
 <h1 data-number="7"><span class="header-section-number">7</span> Results</h1>
-<section id="limitations-of-investigation" class="level2" data-number="7.1">
-<h2 data-number="7.1" class="anchored" data-anchor-id="limitations-of-investigation"><span class="header-section-number">7.1</span> Limitations of Investigation</h2>
+<p>Despite all of the cleaning and analysis above, there is still one elephant in the room; the DATA2x02 students who responded to the survey are not representative of the entire DATA2002 cohort. This opens the conclusions drawn in this report to be influenced by many biases, such as non-response/self-selection bias which inherently induces an under-coverage of the DATA2x02 cohort.</p>
+<p>Fortunately, it appears as if these biases have not had a large impact on factors such as WAM. For example, the average WAM across the entire responding cohort is 74 which is approximately equal to the current average WAM at the University of Sydney (see <a href="https://imgur.com/a/TFZzTZv">this</a> semester average mark distribution across the USYD faculty of engineering in 2018).</p>
+<p>Moreover, while these biases may have had a net impact over the entire cohort of responders, by comparing and contrasting the summary statistics of two groups of responders, we reduce the potential impact of any bias. Hence, the aim of this report still has integrity in stating that:</p>
 <ol type="1">
-<li><em>Do DATA2902 students achieve higher WAMs than DATA2002 students?</em></li>
+<li>DATA2902 students perform better, on average, than DATA2002 students,</li>
+<li>DATA2902 students work more, on average, than DATA2002 students,</li>
+<li>DATA2902 students and DATA2002 students participate in the same sports in equal proportions.</li>
 </ol>
-<p>Issues: the DATA2002 students who responded are not representative of the entire DATA2002 cohort.</p>
-<p>The sampling from each group is not independent and identically distributed (see <a href="#fig-histwam">Figure 4</a> ).</p>
-<p>Note that the WAM is not affected too much by sample bias, following https://imgur.com/a/TFZzTZv.</p>
-</section>
+<p>It is worthwhile to note that while the above is probably true on average across the entire DATA2x02 cohort, it cannot reliably be used on an individual level, even if we were to ignore the ethical boundaries of such an action. For example, suppose that you did choose to compare a random DATA2902 student to a random DATA2002 student via WAM.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="dv">100</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2022</span>)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>rand_n_D2902 <span class="ot">=</span> <span class="fu">sample</span>(<span class="fu">unlist</span>(df[df<span class="sc">$</span>normal_advanced <span class="sc">==</span> <span class="st">&quot;DATA2902&quot;</span>, <span class="st">&quot;wam&quot;</span>]), <span class="at">size=</span>n, <span class="at">replace=</span><span class="cn">TRUE</span>)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>rand_n_D2002 <span class="ot">=</span> <span class="fu">sample</span>(<span class="fu">unlist</span>(df[df<span class="sc">$</span>normal_advanced <span class="sc">==</span> <span class="st">&quot;DATA2002&quot;</span>, <span class="st">&quot;wam&quot;</span>]), <span class="at">size=</span>n, <span class="at">replace=</span><span class="cn">TRUE</span>)</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(rand_n_D2902 <span class="sc">&gt;</span> rand_n_D2002) <span class="sc">/</span> n</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The percentage of the time that the DATA2902 has a higher WAM is 0.74 which is by no means statistically significant.</p>
 </section>
 <section id="references" class="level1" data-number="8">
 
@@ -5667,7 +5669,7 @@ Rather than allowing text input, which accepts subjective answers such as &quot;
 
 # Version, Packages and Cleaning
 
-The calculations in this report were performed in R [@R-base] within the Quarto environment [@quarto] for reproducibility. Data wrangling was performed in base R and the tidyverse [@tidyverse2019] with a single use of naniar [@naniar]. Graphs were produced with ggplot2 [@tidyverse2019].
+The calculations in this report were performed in R [@R-base] within the Quarto environment [@quarto] for reproducibility. Data wrangling was performed in base R and the tidyverse [@tidyverse2019] with a single use of naniar [@naniar]. Graphs were produced with ggplot2 [@tidyverse2019]. Each code chunk in this report features `package_name::` before every non-base and non-ggplot2 function that is used.
 
 Names of the variables were shortened. Extreme values were treated individually; either the entire entry was removed, or the extreme value was replaced with some aggregate. To conserve as much data as possible, missing values were replaced with aggregates where viable.
 
@@ -5724,16 +5726,16 @@ new_names = c(&quot;timestamp&quot;,&quot;covid_positive&quot;,&quot;living_arra
 colnames(df) = new_names
 
 # combine old and new into a data frame:
-name_combo = bind_cols(New = new_names, Old = old_names)
+name_combo = dplyr::bind_cols(New = new_names, Old = old_names)
 important_vars = c(&quot;timestamp&quot;, &quot;study_hrs&quot;, &quot;study_load&quot;, &quot;work&quot;, &quot;normal_advanced&quot;, &quot;exercise_hrs&quot;, &quot;employment_hrs&quot;, &quot;weekly_saving&quot;, &quot;data2x02_hrs&quot;, &quot;sport&quot;, &quot;wam&quot;)
 name_combo |&gt;
-  filter(name_combo$New %in% important_vars) |&gt;
+  dplyr::filter(name_combo$New %in% important_vars) |&gt;
   gt::gt()
 
 
 # subset dataframe and create unique identifier for each entry
 df = df |&gt;
-  mutate(identifier = row_number()) |&gt;
+  dplyr::mutate(identifier = row_number()) |&gt;
   subset(select=c(&quot;identifier&quot;, important_vars[important_vars != &quot;timestamp&quot;]))
 ```
 
@@ -5750,12 +5752,12 @@ quarto-executable-code-5450563D
 #|    - &quot;&quot;
 #| layout-ncol: 2
 
-hist(df$study_hrs, main=&quot;&quot;, xlab=as.character(name_combo[name_combo$New == &quot;study_hrs&quot;,2]))
-hist(df$exercise_hrs, main=&quot;&quot;, xlab=as.character(name_combo[name_combo$New == &quot;exercise_hrs&quot;,2]))
-hist(df$employment_hrs, main=&quot;&quot;, xlab=as.character(name_combo[name_combo$New == &quot;employment_hrs&quot;,2]))
-hist(df$weekly_saving, main=&quot;&quot;, xlab=as.character(name_combo[name_combo$New == &quot;weekly_saving&quot;,2]))
-hist(df$data2x02_hrs, main=&quot;&quot;, xlab=as.character(name_combo[name_combo$New == &quot;data2x02_hrs&quot;,2]))
-hist(df$wam, main=&quot;&quot;, xlab=as.character(name_combo[name_combo$New == &quot;wam&quot;,2]))
+graphics::hist(df$study_hrs, main=&quot;&quot;, xlab=as.character(name_combo[name_combo$New == &quot;study_hrs&quot;,2]))
+graphics::hist(df$exercise_hrs, main=&quot;&quot;, xlab=as.character(name_combo[name_combo$New == &quot;exercise_hrs&quot;,2]))
+graphics::hist(df$employment_hrs, main=&quot;&quot;, xlab=as.character(name_combo[name_combo$New == &quot;employment_hrs&quot;,2]))
+graphics::hist(df$weekly_saving, main=&quot;&quot;, xlab=as.character(name_combo[name_combo$New == &quot;weekly_saving&quot;,2]))
+graphics::hist(df$data2x02_hrs, main=&quot;&quot;, xlab=as.character(name_combo[name_combo$New == &quot;data2x02_hrs&quot;,2]))
+graphics::hist(df$wam, main=&quot;&quot;, xlab=as.character(name_combo[name_combo$New == &quot;wam&quot;,2]))
 ```
 
 Let&#39;s investigate the abnormal response of 100,000 hours spent studying per week. `r filter(df, study_hrs &gt; 100)`
@@ -5778,10 +5780,10 @@ A similar process is applied to each of the other variables:
 
     ```{r}
     df &lt;- df |&gt;
-      mutate(exercise_hrs = replace(exercise_hrs, exercise_hrs==168, NA))
+      dplyr::mutate(exercise_hrs = replace(exercise_hrs, exercise_hrs==168, NA))
 
     df &lt;- df |&gt;
-      filter(!(identifier == &quot;69&quot;))
+      dplyr::filter(!(identifier == &quot;69&quot;))
     ```
 
 -   **`employment_hrs:`** A closer investigation on the row with greater than 50 employment hours gives fairly realistic results, including fewer study hours and more weekly savings to accommodate for the lager number of employment hours. Hence, this row will not be mutated. `r filter(df, employment_hrs &gt; 50)`
@@ -5796,8 +5798,8 @@ A similar process is applied to each of the other variables:
 
     ```{r}
     df &lt;- df |&gt;
-      filter(identifier != &quot;11&quot;) |&gt;
-      filter(identifier != &quot;187&quot;)
+      dplyr::filter(identifier != &quot;11&quot;) |&gt;
+      dplyr::filter(identifier != &quot;187&quot;)
     ```
 
     Note that the `187` identifier was the only outlier in the distribution for DATA2x02 study hours, so we do not need to remove any more outliers from `data2x02_hrs`.
@@ -5806,7 +5808,7 @@ A similar process is applied to each of the other variables:
 
     ```{r}
     df &lt;- df |&gt;
-      mutate(wam = replace(wam, wam&lt;10, NA))
+      dplyr::mutate(wam = replace(wam, wam&lt;10, NA))
     ```
 
 ## Cleaning - NAs
@@ -5835,12 +5837,12 @@ First I need to deal with any potential `NA` values in the employment categories
     df &lt;- df |&gt;
       # Replace work value with &quot;I don&#39;t currently work&quot; if 0 employment_hours and 
       # work is NA.
-      mutate(work = if_else(
+      dplyr::mutate(work = dplyr::if_else(
         is.na(work) &amp; employment_hrs == 0,
         true=&quot;I don&#39;t currently work&quot;,
         false=work)) |&gt;
       # Filter to remove rows which contain NA values for work and employment_hrs
-      filter(!(is.na(work) &amp; is.na(employment_hrs)))
+      dplyr::filter(!(is.na(work) &amp; is.na(employment_hrs)))
     ```
 
     Similarly, looking at the &quot;I don&#39;t currently work&quot; category in `work`, some individuals have written nonzero values for `employment_hrs`.
@@ -5851,7 +5853,7 @@ First I need to deal with any potential `NA` values in the employment categories
 
     ```{r}
     df &lt;- df |&gt;
-      mutate(employment_hrs = if_else(
+      dplyr::mutate(employment_hrs = dplyr::if_else(
         work==&quot;I don&#39;t currently work&quot;,
         true=0,
         false=employment_hrs)
@@ -5862,7 +5864,7 @@ First I need to deal with any potential `NA` values in the employment categories
 
     ```{r}
     df &lt;- df |&gt;
-      mutate(employment_hrs = case_when(
+      dplyr::mutate(employment_hrs = dplyr::case_when(
         is.na(employment_hrs) &amp; work == &quot;Full time&quot; ~ sapply(df[df$work==&quot;Full time&quot;,
                                                            &quot;employment_hrs&quot;],
                                                            mean,
@@ -5902,7 +5904,7 @@ First I need to deal with any potential `NA` values in the employment categories
 
     ```{r}
     df &lt;- df |&gt;
-      mutate(weekly_saving = case_when(
+      dplyr::mutate(weekly_saving = dplyr::case_when(
         is.na(weekly_saving) &amp; work == &quot;Full time&quot; ~ sapply(df[df$work==&quot;Full time&quot;,
                                                            &quot;weekly_saving&quot;],
                                                            mean,
@@ -5952,7 +5954,7 @@ Now I need to deal with any potential `NA` values in the study categories (study
 
     ```{r}
     df &lt;- df |&gt;
-      mutate(study_hrs = case_when(
+      dplyr::mutate(study_hrs = dplyr::case_when(
         is.na(study_hrs) &amp; study_load == &quot;Full time&quot; ~ sapply(df[df$study_load==&quot;Full time&quot;,
                                                            &quot;study_hrs&quot;],
                                                            mean,
@@ -5972,7 +5974,7 @@ Now I need to deal with any potential `NA` values in the study categories (study
 
     ```{r}
     df &lt;- df |&gt;
-      filter(!is.na(normal_advanced))
+      dplyr::filter(!is.na(normal_advanced))
     ```
 
 -   **`data2x02_hrs:`** it can be assumed that the number of hours spent on DATA2x02 is proportional to the total number of study hours, and that the proportion is roughly equal for all students. The mean proportion of data2x02_hrs / study_hrs is equal to `r sapply(df[df$study_hrs != 0,&quot;data2x02_hrs&quot;]/df[df$study_hrs != 0, &quot;study_hrs&quot;], mean, na.rm=TRUE)`.
@@ -5981,14 +5983,14 @@ Now I need to deal with any potential `NA` values in the study categories (study
     prop_data2x02 = sapply(df[df$study_hrs != 0,&quot;data2x02_hrs&quot;]/df[df$study_hrs != 0, &quot;study_hrs&quot;], mean, na.rm=TRUE)
 
     df &lt;- df |&gt;
-      mutate(data2x02_hrs = if_else(is.na(data2x02_hrs), true=prop_data2x02*study_hrs, false=data2x02_hrs))
+      dplyr::mutate(data2x02_hrs = dplyr::if_else(is.na(data2x02_hrs), true=prop_data2x02*study_hrs, false=data2x02_hrs))
     ```
 
 -   **`wam:`** this variable is difficult to predict based on the data given, so rows containing `NA` values here will be removed from the dataframe.
 
     ```{r}
     df &lt;- df |&gt;
-      filter(!is.na(wam))
+      dplyr::filter(!is.na(wam))
     ```
 
 ### NAs in Sport
@@ -6001,20 +6003,20 @@ There are only a few NA values in the sport section.
 
     ```{r}
     df &lt;- df |&gt;
-      mutate(sport = replace_na(sport, &quot;I Don&#39;t Play any Sport&quot;))
+      dplyr::mutate(sport = tidyr::replace_na(sport, &quot;I Don&#39;t Play any Sport&quot;))
     ```
 
 -   **`exercise_hrs:`** let&#39;s look at the NAs in this column. `r filter(df, is.na(exercise_hrs))`
 
     ```{r}
-    filter(df, is.na(exercise_hrs))
+    dplyr::filter(df, is.na(exercise_hrs))
     ```
 
     These NAs are too complex to predict. Hence, I will remove them from the dataframe.
 
     ```{r}
     df &lt;- df |&gt;
-      filter(!is.na(exercise_hrs))
+      dplyr::filter(!is.na(exercise_hrs))
     ```
 
 # Hypothesis Tests
@@ -6108,7 +6110,7 @@ d2902_wam = unlist(df[df$normal_advanced == &quot;DATA2902&quot;, &quot;wam&quot
 d2002_wam = unlist(df[df$normal_advanced == &quot;DATA2002&quot;, &quot;wam&quot;])
 
 # Looks at d2902_wam - d2002_wam
-t_test = t.test(d2902_wam, d2002_wam, alternative=&quot;greater&quot;, paired=FALSE, var.equal=FALSE, correct=FALSE, conf.level = 0.95)
+t_test = stats::t.test(d2902_wam, d2002_wam, alternative=&quot;greater&quot;, paired=FALSE, var.equal=FALSE, correct=FALSE, conf.level = 0.95)
 ```
 
 1.  **Hypothesis:** Let $\mu_\text{Adv}$ be the mean WAM of *DATA2902* students, and $\mu_\text{Nml}$ be the mean WAM of *DATA2002* students. The null hypothesis is $H_0: \mu_\text{Adv} = \mu_\text{Nml}$ and the alternative hypothesis $H_1: \mu_\text{Adv} &gt; \mu_\text{Nml}$.
@@ -6132,10 +6134,8 @@ We can attempt to visualize a correlation by looking at the data among those who
 #| label: fig-histscat
 #| fig-cap: &quot;(A) Scatter Plot of WAM and Employment Hours and (B) Histogram of Employment Hours&quot;
 
-library(patchwork)
-
 df_work &lt;- df |&gt;
-  filter(employment_hrs != 0)
+  dplyr::filter(employment_hrs != 0)
 
 # Define vector for filling each histogram based on normal_advanced value
 colors = rep(0,length(df_work$normal_advanced))
@@ -6174,8 +6174,9 @@ p2 &lt;- ggplot(df_work) +
   guides(color=FALSE)
 
 # requires &quot;patchwork&quot; package
-p1 + p2 + plot_layout(guides = &#39;collect&#39;) +
-  plot_annotation(tag_levels = &#39;A&#39;)
+library(patchwork)
+p1 + p2 + patchwork::plot_layout(guides = &#39;collect&#39;) +
+  patchwork::plot_annotation(tag_levels = &#39;A&#39;)
 ```
 
 The visualizations show that generally students with higher WAMs tend to work fewer hours, with a more negative correlation among DATA2902 students. We also see that the distribution of Employment Hours among each stream is identical but neither normal nor symmetric. We will use a Wilcoxon rank-sum test here.
@@ -6190,15 +6191,14 @@ r = rank(c(x, y))
 w_sum = c(&quot;W&quot; = sum(r[1:length(x)]))
 min_w = length(x)*(length(x)+1)/2
 
-w_sum
-2*pwilcox(w_sum - min_w - 1, length(x), length(y), lower.tail=FALSE)
+p_val = 2*stats::pwilcox(w_sum - min_w - 1, length(x), length(y), lower.tail=FALSE)
 ```
 
 1.  **Hypothesis:** Let $\mu_\text{Adv}$ be the mean hours worked for *DATA2902* students, and $\mu_\text{Nml}$ be the mean hours worked for *DATA2002* students. The null hypothesis is $H_0: \mu_\text{Adv} = \mu_\text{Nml}$ and the alternative hypothesis $H_1: \mu_\text{Adv} \neq \mu_\text{Nml}$.
 2.  **Assumptions:** the two populations are independent and follow the same distribution but differ by a shift (@fig-histscat ).
 3.  **Test statistic:** $W = R_1 + R_2 +\ ...\ + R_{33}$ where \$R_i\\in \\text{ranks}(X\_\\text{Adv})\$. Under \$H_0\$, $W$ follows the $WRS(n_\text{Adv}, n_\text{Nml})$ distribution.
 4.  **Observed test statistic:** $w=$ `r w_sum`
-5.  **p-value:** $2P(W\geq$ `r w_sum` $) &lt; 0.05$
+5.  **p-value:** $2P(W\geq$ `r w_sum` $) =$ `r signif(p_val,3)` $&lt; 0.05$
 6.  **Decision:** Since the p-value is less than 0.05, we reject the null hypothesis in favour of the alternative hypothesis. Hence, we conclude that *DATA2902* students do not work the same number of hours as *DATA2002* students. Moreover, @tbl-employmentsummary shows that *DATA2902* students work more hours than *DATA2902* hours, on average.
 
 quarto-executable-code-5450563D
@@ -6264,7 +6264,7 @@ As many of the entries in this table contain values that are less than five, I w
 ```{r, warning=FALSE}
 set.seed(2022)
 sport_data = as.matrix(cont_table)
-chi_test = chisq.test(sport_data, simulate.p.value=TRUE, B=10000)
+chi_test = stats::chisq.test(sport_data, simulate.p.value=TRUE, B=10000)
 ```
 
 1.  **Hypothesis:** $H_0: p_{ij} = p_{\bullet j} = y_{\bullet j}/n$ and $H_1: p_{ij}\neq p_{\bullet j}$.
@@ -6276,15 +6276,33 @@ chi_test = chisq.test(sport_data, simulate.p.value=TRUE, B=10000)
 
 # Results
 
-## Limitations of Investigation
+Despite all of the cleaning and analysis above, there is still one elephant in the room; the DATA2x02 students who responded to the survey are not representative of the entire DATA2002 cohort. This opens the conclusions drawn in this report to be influenced by many biases, such as non-response/self-selection bias which inherently induces an under-coverage of the DATA2x02 cohort.
 
-1.  *Do DATA2902 students achieve higher WAMs than DATA2002 students?*
+Fortunately, it appears as if these biases have not had a large impact on factors such as WAM. For example, the average WAM across the entire responding cohort is `r signif(mean(df$wam), 2)` which is approximately equal to the current average WAM at the University of Sydney (see [this](https://imgur.com/a/TFZzTZv) semester average mark distribution across the USYD faculty of engineering in 2018).
 
-Issues: the DATA2002 students who responded are not representative of the entire DATA2002 cohort.
+Moreover, while these biases may have had a net impact over the entire cohort of responders, by comparing and contrasting the summary statistics of two groups of responders, we reduce the potential impact of any bias. Hence, the aim of this report still has integrity in stating that:
 
-The sampling from each group is not independent and identically distributed (see @fig-histwam ).
+1.  DATA2902 students perform better, on average, than DATA2002 students,
+2.  DATA2902 students work more, on average, than DATA2002 students,
+3.  DATA2902 students and DATA2002 students participate in the same sports in equal proportions.
 
-Note that the WAM is not affected too much by sample bias, following https://imgur.com/a/TFZzTZv.
+It is worthwhile to note that while the above is probably true on average across the entire DATA2x02 cohort, it cannot reliably be used on an individual level, even if we were to ignore the ethical boundaries of such an action. For example, suppose that you did choose to compare a random DATA2902 student to a random DATA2002 student via WAM.
+
+quarto-executable-code-5450563D
+
+```r
+#| output: false
+n=100
+
+set.seed(2022)
+
+rand_n_D2902 = sample(unlist(df[df$normal_advanced == &quot;DATA2902&quot;, &quot;wam&quot;]), size=n, replace=TRUE)
+rand_n_D2002 = sample(unlist(df[df$normal_advanced == &quot;DATA2002&quot;, &quot;wam&quot;]), size=n, replace=TRUE)
+
+sum(rand_n_D2902 &gt; rand_n_D2002) / n
+```
+
+The percentage of the time that the DATA2902 has a higher WAM is `r sum(rand_n_D2902 &gt; rand_n_D2002) / n` which is by no means statistically significant.
 
 # References</code></pre>
 </div></div></div></div></div>
