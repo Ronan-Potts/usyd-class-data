@@ -231,7 +231,7 @@ A similar process is applied to each of the other variables:
       dplyr::mutate(exercise_hrs = replace(exercise_hrs, exercise_hrs==168, NA))
 
     df <- df |>
-      dplyr::filter(!(identifier == "69"))
+      dplyr::filter(!(identifier == "155"))
     ```
 
 -   **`employment_hrs:`** A closer investigation on the row with greater than 50 employment hours gives fairly realistic results, including fewer study hours and more weekly savings to accommodate for the lager number of employment hours. Hence, this row will not be mutated. `r filter(df, employment_hrs > 50)`

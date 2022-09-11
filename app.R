@@ -9,8 +9,6 @@ raw_data = readr::read_tsv("Data/DATA2x02 survey (2022) - Form responses 1.tsv")
 colnames(raw_data) = c("timestamp","covid_positive","living_arrangements","height","uni_travel_method","uni_travel_listen","spain_budget","feel_overseas","feel_anxious","study_hrs","read_news","study_load","work","lab_zoom","social_media","gender","sleep_time","wake_time","random_number","steak_preference","dominant_hand","normal_advanced","exercise_hrs","employment_hrs","city","weekly_saving","hourly_plan","weeks_behind","assignment_on_time","used_r_before","team_role","data2x02_hrs","social_media_hrs","uni_year","sport","wam","shoe_size","decade_selection")
 
 
-
-
 # Define UI for application that draws a histogram
 ui <- dashboardPage(title="DATA2X02 Survey Analysis",
                     # Application title

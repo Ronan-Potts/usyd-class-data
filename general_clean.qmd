@@ -1,0 +1,466 @@
+---
+title: "DATA2902 Assignment"
+date: "`r Sys.Date()`"
+author: "510456760"
+bibliography: bibliography.bib
+format: 
+  html: 
+    self-contained: true # Creates a single HTML file as output
+    code-fold: true # Code folding; allows you to show/hide code chunks
+    code-tools: true # Includes a menu to download the code file
+    df-print: paged
+execute:
+  warning: false
+table-of-contents: true # (Optional) Creates a table of contents!
+number-sections: true # (Optional) Puts numbers next to heading/subheadings
+---
+
+# Importing Data
+
+## Importing Packages
+
+This report requires packages from the `tidyverse` library.
+
+```{r}
+#| message: false
+library(tidyverse)
+```
+
+## Reading Data
+
+The data can be read using `readr::read_tsv()` from the `readr` package.
+
+```{r}
+df = readr::read_tsv("Data/DATA2x02 survey (2022) - Form responses 1.tsv")
+```
+
+# Data Processing Steps
+
+Before I can analyse any of the data, the data needs to be cleaned. Before I can clean any of the data, the columns need to be renamed using @tarr2022 . However, since I only care about money saved, WAM, unit enrolment, study hours, and sports, many of the columns are unnecessary and would otherwise cluster the report, so I will also subset the data only for the columns that are related to my questions.
+
+Note that there is also no simple way to uniquely identify each column. The `timestamp` option could be used, but it is not impossible that two people submitted their surveys at the exact same time. Hence, an `identifier` column will be added, following the footsteps of @tarr2022 .
+
+```{r}
+old_names = colnames(df)
+new_names = c("timestamp","covid_positive","living_arrangements","height","uni_travel_method","uni_travel_listen","spain_budget","feel_overseas","feel_anxious","study_hrs","read_news","study_load","work","lab_zoom","social_media","gender","sleep_time","wake_time","random_number","steak_preference","dominant_hand","normal_advanced","exercise_hrs","employment_hrs","city","weekly_saving","hourly_plan","weeks_behind","assignment_on_time","used_r_before","team_role","data2x02_hrs","social_media_hrs","uni_year","sport","wam","shoe_size","decade_selection")
+
+# overwrite the old names with the new names:
+colnames(df) = new_names
+
+# combine old and new into a data frame:
+name_combo = dplyr::bind_cols(New = new_names, Old = old_names)
+gt <- name_combo |>
+  gt::gt()
+
+
+# subset dataframe and create unique identifier for each entry
+df = df |>
+  dplyr::mutate(identifier = row_number()) |>
+  subset(select=c("identifier", new_names[new_names != "timestamp"]))
+
+```
+
+## Cleaning - Absurd Responses
+
+Before I can deal with any `NA` values, I first need to deal with absurd (i.e. obviously false) responses. The simplest method to detect any absurd responses in the quantitative sections is to construct a histogram of the data. Consider the histograms in @fig-quantitativehists :
+
+```{r}
+#| label: fig-quantitativehists
+#| fig-cap: "Histograms of Quantitative Variables in DATA2x02 Survey" 
+#| fig-subcap:
+#|    - ""
+#| layout-ncol: 2
+
+graphics::hist(df$study_hrs, main="", xlab=as.character(name_combo[name_combo$New == "study_hrs",2]))
+graphics::hist(df$exercise_hrs, main="", xlab=as.character(name_combo[name_combo$New == "exercise_hrs",2]))
+graphics::hist(df$employment_hrs, main="", xlab=as.character(name_combo[name_combo$New == "employment_hrs",2]))
+graphics::hist(df$weekly_saving, main="", xlab=as.character(name_combo[name_combo$New == "weekly_saving",2]))
+graphics::hist(df$data2x02_hrs, main="", xlab=as.character(name_combo[name_combo$New == "data2x02_hrs",2]))
+graphics::hist(df$wam, main="", xlab=as.character(name_combo[name_combo$New == "wam",2]))
+
+graphics::hist(df$height, main="", xlab=as.character(name_combo[name_combo$New == "wam",2]))
+```
+
+Let's investigate the abnormal response of 100,000 hours spent studying per week. `r filter(df, study_hrs > 100)`
+
+Ignoring their false `study_hrs` input, this row seems completely normal, so I'll just replace the study_hours value with an NA value and treat it later on with the other NA values.
+
+```{r}
+df <- naniar::replace_with_na(df, replace = list(study_hrs = 1e+06))
+```
+
+A similar process is applied to each of the other variables:
+
+-   **`exercise_hrs:`** filtering for individuals with more than 50 hours spent exercising gives two abnormal results: `r filter(df, exercise_hrs>50)`
+
+    -   The result with 168 hours spent exercising seems fairly average if we ignore `exercise_hours` , so I will replace their exercise_hrs entry with `NA`.
+
+    -   The result with 52 hours spent exercising also has a WAM of 69 and a gender of "attack helicopter" @tarr2022 . This entire row will be removed by filtering.
+
+    ```{r}
+    df <- df |>
+      dplyr::mutate(exercise_hrs = replace(exercise_hrs, exercise_hrs==168, NA))
+
+    df <- df |>
+      dplyr::filter(!(identifier == "155"))
+    ```
+
+-   **`employment_hrs:`** A closer investigation on the row with greater than 50 employment hours gives fairly realistic results, including fewer study hours and more weekly savings to accommodate for the lager number of employment hours. Hence, this row will not be mutated. `r filter(df, employment_hrs > 50)`
+
+-   **`weekly_saving:`** Looking at the rows containing a weekly saving of more than 1000 AUD per week, we see two outliers (ignoring the value of 1500 which was explored above) with obviously false results. `r filter(df, weekly_saving > 1000)`
+
+    -   The row with an identifier of `11` contains various peculiarities, such as 5 total hours spent studying but somehow 7 hours spent studying DATA2x02, and a remarkable weekly saving of 69,420 AUD.
+
+    -   The row with an identifier of `187` contains many interesting results as well, such as a WAM of 1, 78 hours spent on DATA2x02 despite just 18 hours spent studying each week, and weekly savings of 4023 AUD.
+
+    Both of the entries above are entirely untrustworthy and will be removed from the dataset.
+
+    ```{r}
+    df <- df |>
+      dplyr::filter(identifier != "11") |>
+      dplyr::filter(identifier != "187")
+    ```
+
+    Note that the `187` identifier was the only outlier in the distribution for DATA2x02 study hours, so we do not need to remove any more outliers from `data2x02_hrs`.
+
+-   **`wam:`** many entries gave a WAM that is less than 50. The entries with a WAM of `34.0` and `45.0` appear relatively normal otherwise, so I'll leave those. The entries with a WAM that is less than `10.0` are very unlikely, yet the rest of these rows appear normal, so I will just replace the WAMs that are less than `10.0` with `NA` values.
+
+    ```{r}
+    df <- df |>
+      dplyr::mutate(wam = replace(wam, wam<10, NA))
+    ```
+
+## Cleaning - NAs
+
+We can use the `visdat` package to find any NA values in the data.
+
+```{r}
+visdat::vis_miss(df)
+```
+
+### NAs in Employment
+
+First I need to deal with any potential `NA` values in the employment categories (work, employment_hrs, weekly_saving). Each category will be dealt with uniquely.
+
+-   **`work:`** Let's first look at the `NA` values in this column. `r filter(df, is.na(work))`
+
+    We see that:
+
+    -   One row contains an `NA` value for `work`, but has defined `employment_hrs` as 0. I will replace the `work` value here with "I don't currently work".
+
+    -   On the other hand, the second entry consists of mostly `NA` values and will be removed.
+
+    ```{r}
+    df <- df |>
+      # Replace work value with "I don't currently work" if 0 employment_hours and 
+      # work is NA.
+      dplyr::mutate(work = dplyr::if_else(
+        is.na(work) & employment_hrs == 0,
+        true="I don't currently work",
+        false=work)) |>
+      # Filter to remove rows which contain NA values for work and employment_hrs
+      dplyr::filter(!(is.na(work) & is.na(employment_hrs)))
+    ```
+
+    Similarly, looking at the "I don't currently work" category in `work`, some individuals have written nonzero values for `employment_hrs`.
+
+    `r df |> filter(work=="I don't currently work" & employment_hrs!=0) |>   subset(select=c("identifier", "work", "employment_hrs"))`
+
+    These values will be replaced with zeroes.
+
+    ```{r}
+    df <- df |>
+      dplyr::mutate(employment_hrs = dplyr::if_else(
+        work=="I don't currently work",
+        true=0,
+        false=employment_hrs)
+      )
+    ```
+
+-   **`employment_hrs:`** Now I need to treat the NA values in `employment_hrs`. If there is an `NA` in `employment_hrs`, then I will replace the `employment_hrs` value with the average value in the row's given `work` category.
+
+    ```{r}
+    df <- df |>
+      dplyr::mutate(employment_hrs = dplyr::case_when(
+        is.na(employment_hrs) & work == "Full time" ~ sapply(df[df$work=="Full time",
+                                                           "employment_hrs"],
+                                                           mean,
+                                                           na.rm = TRUE
+                                                        ),
+        is.na(employment_hrs) & work == "Part time" ~ sapply(df[df$work=="Part time",
+                                                           "employment_hrs"],
+                                                           mean,
+                                                           na.rm = TRUE
+                                                        ),
+        is.na(employment_hrs) & work == "Casual" ~ sapply(df[df$work=="Casual",
+                                                           "employment_hrs"],
+                                                          mean,
+                                                          na.rm = TRUE
+                                                        ),
+        is.na(employment_hrs) & work == "Self employed" ~ sapply(df[df$work=="Self employed",
+                                                           "employment_hrs"],
+                                                           mean,
+                                                           na.rm = TRUE
+                                                        ),
+        is.na(employment_hrs) & work == "Contractor" ~ sapply(df[df$work=="Contractor",
+                                                           "employment_hrs"],
+                                                           mean,
+                                                           na.rm = TRUE
+                                                        ),
+        is.na(employment_hrs) & work == "I don't currently work" ~ sapply(df[df$work=="I don't currently work",
+                                                           "employment_hrs"],
+                                                           mean,
+                                                           na.rm = TRUE
+                                                        ),
+        TRUE ~ employment_hrs
+        )
+      )
+    ```
+
+-   **`weekly_saving:`** Finally, I need to clean the NAs in the `weekly_saving` category. If there is an `NA` in `weekly_saving`, then I will replace the `weekly_saving`value with the average value in the row's given `work` category.
+
+    ```{r}
+    df <- df |>
+      dplyr::mutate(weekly_saving = dplyr::case_when(
+        is.na(weekly_saving) & work == "Full time" ~ sapply(df[df$work=="Full time",
+                                                           "weekly_saving"],
+                                                           mean,
+                                                           na.rm = TRUE
+                                                        ),
+        is.na(weekly_saving) & work == "Part time" ~ sapply(df[df$work=="Part time",
+                                                           "weekly_saving"],
+                                                           mean,
+                                                           na.rm = TRUE
+                                                        ),
+        is.na(weekly_saving) & work == "Casual" ~ sapply(df[df$work=="Casual",
+                                                           "weekly_saving"],
+                                                          mean,
+                                                          na.rm = TRUE
+                                                        ),
+        is.na(weekly_saving) & work == "Self employed" ~ sapply(df[df$work=="Self employed",
+                                                           "weekly_saving"],
+                                                           mean,
+                                                           na.rm = TRUE
+                                                        ),
+        is.na(weekly_saving) & work == "Contractor" ~ sapply(df[df$work=="Contractor",
+                                                           "weekly_saving"],
+                                                           mean,
+                                                           na.rm = TRUE
+                                                        ),
+        is.na(weekly_saving) & work == "I don't currently work" ~ sapply(df[df$work=="I don't currently work",
+                                                           "weekly_saving"],
+                                                           mean,
+                                                           na.rm = TRUE
+                                                        ),
+        TRUE ~ weekly_saving
+        )
+      )
+    ```
+
+    Even after this, there is one missing value from identifier `81`, which is the only individual who is a contractor and hence the mean is undefined. Since they have written 0 employment hours, then I will assign their weekly savings the same value as the mean of the savings in the group with zero employment hours.
+
+    ```{r}
+    df[df$work=="Contractor","weekly_saving"] = sapply(df[df$employment_hrs == 0, "weekly_saving"], mean, na.rm=TRUE)
+    ```
+
+### NAs in Study
+
+Now I need to deal with any potential `NA` values in the study categories (study_hrs, study_load, normal_advanced, data2x02_hrs, wam). Each category will be dealt with uniquely.
+
+-   **`study_hrs:`** given that there are no `NA` values in the study_load column, I will replace NAs in `study_hrs` with the average value for `study_hrs` in their given `study_load` category.
+
+    ```{r}
+    df <- df |>
+      dplyr::mutate(study_hrs = dplyr::case_when(
+        is.na(study_hrs) & study_load == "Full time" ~ sapply(df[df$study_load=="Full time",
+                                                           "study_hrs"],
+                                                           mean,
+                                                           na.rm = TRUE
+                                                        ),
+        is.na(study_hrs) & study_load == "Part time" ~ sapply(df[df$study_load=="Part time",
+                                                           "study_hrs"],
+                                                           mean,
+                                                           na.rm = TRUE
+                                                        ),
+        TRUE ~ study_hrs
+        )
+      )
+    ```
+
+-   **`normal_advanced:`** the `NA` values in this categorical variable make up just 1% of the values in `normal_advanced`. Hence, I will just remove these values from the dataframe.
+
+    ```{r}
+    df <- df |>
+      dplyr::filter(!is.na(normal_advanced))
+    ```
+
+-   **`data2x02_hrs:`** it can be assumed that the number of hours spent on DATA2x02 is proportional to the total number of study hours, and that the proportion is roughly equal for all students. The mean proportion of data2x02_hrs / study_hrs is equal to `r sapply(df[df$study_hrs != 0,"data2x02_hrs"]/df[df$study_hrs != 0, "study_hrs"], mean, na.rm=TRUE)`.
+
+    ```{r}
+    prop_data2x02 = sapply(df[df$study_hrs != 0,"data2x02_hrs"]/df[df$study_hrs != 0, "study_hrs"], mean, na.rm=TRUE)
+
+    df <- df |>
+      dplyr::mutate(data2x02_hrs = dplyr::if_else(is.na(data2x02_hrs), true=prop_data2x02*study_hrs, false=data2x02_hrs))
+    ```
+
+-   **`wam:`** this variable is difficult to predict based on the data given, so rows containing `NA` values here will be removed from the dataframe.
+
+    ```{r}
+    df <- df |>
+      dplyr::filter(!is.na(wam))
+    ```
+
+### NAs in Sport
+
+There are only a few NA values in the sport section.
+
+-   **`sport:`** let's take a look at the NAs in this column. `r filter(df, is.na(sport))`
+
+    We can assume these NA values to mean "I don't play any sport".
+
+    ```{r}
+    df <- df |>
+      dplyr::mutate(sport = tidyr::replace_na(sport, "I Don't Play any Sport"))
+    ```
+
+-   **`exercise_hrs:`** let's look at the NAs in this column. `r filter(df, is.na(exercise_hrs))`
+
+    ```{r}
+    dplyr::filter(df, is.na(exercise_hrs))
+    ```
+
+    These NAs are too complex to predict. Hence, I will remove them from the dataframe.
+
+    ```{r}
+    df <- df |>
+      dplyr::filter(!is.na(exercise_hrs))
+    ```
+
+# Cleaning Summary
+
+```{r}
+#| warning: false
+
+# Import data
+df = readr::read_tsv("Data/DATA2x02 survey (2022) - Form responses 1.tsv")
+
+# Rename columns
+colnames(df) = c("timestamp","covid_positive","living_arrangements","height","uni_travel_method","uni_travel_listen","spain_budget","feel_overseas","feel_anxious","study_hrs","read_news","study_load","work","lab_zoom","social_media","gender","sleep_time","wake_time","random_number","steak_preference","dominant_hand","normal_advanced","exercise_hrs","employment_hrs","city","weekly_saving","hourly_plan","weeks_behind","assignment_on_time","used_r_before","team_role","data2x02_hrs","social_media_hrs","uni_year","sport","wam","shoe_size","decade_selection")
+
+# Clean height
+df <- df |> 
+  dplyr::mutate(identifier = row_number()) |>
+  dplyr::mutate(
+    height = readr::parse_number(height),
+    height = case_when(
+      height <= 2.5 ~ height * 100,
+      height <= 9 ~ NA_real_,
+      TRUE ~ height
+    )
+  )
+
+# Clean spain_budget
+df <- df |>
+  dplyr::mutate(spain_budget = replace(spain_budget, identifier == 19, 4000)) |>
+  dplyr::mutate(spain_budget = readr::parse_number(spain_budget))
+
+# work: "Doing internship during the vacation" -> I don't currently work
+df <- df |>
+  dplyr::mutate(work = replace(work, identifier == 197, "I don't currently work"))
+
+# lab_zoom: "When I am told to turn it on", "Only when asked to", etc -> "Some of the time"
+df <- df |>
+  dplyr::mutate(lab_zoom = replace(lab_zoom, !(lab_zoom %in% c("Most of the time", "Only in breakout rooms", "Some of the time", "Never", NA, "Never in zoom lab")), "Some of the time")) |>
+  dplyr::mutate(lab_zoom = replace(lab_zoom, lab_zoom == "Never in zoom lab", "Never"))
+  
+# social_media:
+df = df %>% mutate(
+  social_media = tolower(social_media),
+  social_media = str_replace_all(social_media, '[[:punct:]]',' '),
+  social_media = stringr::word(social_media),
+  social_media = case_when(
+    stringr::str_starts(social_media,"ins") ~ "instagram",
+    stringr::str_starts(social_media,"ti") ~ "tiktok",
+    stringr::str_starts(social_media,"mess") ~ "facebook",
+    stringr::str_starts(social_media,"n") ~ "none",
+    is.na(social_media) ~ "none",
+    TRUE ~ social_media
+  ),
+  social_media = tools::toTitleCase(social_media),
+  social_media = forcats::fct_lump_min(social_media, min = 10)
+)
+
+# gender:
+df = df %>% mutate(
+  gender = gendercoder::recode_gender(gender)
+)
+
+
+# steak-preference:
+df = df |>
+  dplyr::mutate(steak_preference = replace(steak_preference, steak_preference == "Don't eat steak", "I don't eat beef")) |>
+  dplyr::mutate(steak_preference = replace(steak_preference, steak_preference == "fry:)", NA))
+
+
+# employment_hrs:
+df <- df |>
+  dplyr::mutate(employment_hrs = dplyr::case_when(
+    is.na(employment_hrs) & work == "Full time" ~ sapply(df[df$work=="Full time",
+                                                       "employment_hrs"],
+                                                       mean,
+                                                       na.rm = TRUE
+                                                    ),
+    is.na(employment_hrs) & work == "Part time" ~ sapply(df[df$work=="Part time",
+                                                       "employment_hrs"],
+                                                       mean,
+                                                       na.rm = TRUE
+                                                    ),
+    is.na(employment_hrs) & work == "Casual" ~ sapply(df[df$work=="Casual",
+                                                       "employment_hrs"],
+                                                      mean,
+                                                      na.rm = TRUE
+                                                    ),
+    is.na(employment_hrs) & work == "Self employed" ~ sapply(df[df$work=="Self employed",
+                                                       "employment_hrs"],
+                                                       mean,
+                                                       na.rm = TRUE
+                                                    ),
+    is.na(employment_hrs) & work == "Contractor" ~ sapply(df[df$work=="Contractor",
+                                                       "employment_hrs"],
+                                                       mean,
+                                                       na.rm = TRUE
+                                                    ),
+    is.na(employment_hrs) & work == "I don't currently work" ~ sapply(df[df$work=="I don't currently work",
+                                                       "employment_hrs"],
+                                                       mean,
+                                                       na.rm = TRUE
+                                                    ),
+    TRUE ~ employment_hrs
+    )
+  )
+
+# weeks_behind: replace values which are larger than 8 with NA
+df <- df |>
+  dplyr::mutate(weeks_behind = replace(weeks_behind, weeks_behind >= 8, NA))
+
+# Remove absurd responses
+df <- df |>
+  subset(select=-city) |>
+  dplyr::mutate(study_hrs = replace(study_hrs, study_hrs >= 200, NA)) |>
+  dplyr::mutate(exercise_hrs = replace(exercise_hrs, exercise_hrs>=100, NA)) |>
+  dplyr::mutate(wam = replace(wam, wam<10, NA)) |>
+  # The identifiers below have multiple absurd responses.
+  dplyr::filter(!(identifier == "155")) |>
+  dplyr::filter(weekly_saving <= 4000)
+  
+
+
+
+# Cleaned:
+
+# covid_positive, living_arrangements, height, uni_travel_method, uni_travel_listen, spain_budget, feel_overseas, feel_anxious, study_hrs, read_news, study_load, work, lab_zoom, social_media, gender, sleep_time, wake_time, random_number, steak_preference, dominant_hand, normal_advanced, exercise_hrs, employment_hrs, city, weekly_saving, hourly_plan, weeks_behind, assignment_on_time, used_r_before, team_role, data2x02_hrs, 
+
+
+# Removal of NAs will be done dynamically in the application when a test is chosen.
+
+```
