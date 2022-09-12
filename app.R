@@ -1,16 +1,153 @@
 library(shiny)
 library(tidyverse)
 library(shinydashboard)
+library(plotly)
+
+
+# Data cleaning 
+# _______________________________________________________________________________________________________________________________________________________________________________________________________________________________
+# _______________________________________________________________________________________________________________________________________________________________________________________________________________________________
+# _______________________________________________________________________________________________________________________________________________________________________________________________________________________________
+# _______________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 # Import data
-raw_data = readr::read_tsv("Data/DATA2x02 survey (2022) - Form responses 1.tsv")
+df = readr::read_tsv("Data/DATA2x02 survey (2022) - Form responses 1.tsv")
 
-# Clean data
-colnames(raw_data) = c("timestamp","covid_positive","living_arrangements","height","uni_travel_method","uni_travel_listen","spain_budget","feel_overseas","feel_anxious","study_hrs","read_news","study_load","work","lab_zoom","social_media","gender","sleep_time","wake_time","random_number","steak_preference","dominant_hand","normal_advanced","exercise_hrs","employment_hrs","city","weekly_saving","hourly_plan","weeks_behind","assignment_on_time","used_r_before","team_role","data2x02_hrs","social_media_hrs","uni_year","sport","wam","shoe_size","decade_selection")
+# Rename columns
+colnames(df) = c("timestamp","covid_positive","living_arrangements","height","uni_travel_method","uni_travel_listen","spain_budget","feel_overseas","feel_anxious","study_hrs","read_news","study_load","work","lab_zoom","social_media","gender","sleep_time","wake_time","random_number","steak_preference","dominant_hand","normal_advanced","exercise_hrs","employment_hrs","city","weekly_saving","hourly_plan","weeks_behind","assignment_on_time","used_r_before","team_role","data2x02_hrs","social_media_hrs","uni_year","sport","wam","shoe_size","decade_selection")
 
+# Clean height
+df <- df |> 
+  dplyr::mutate(identifier = row_number()) |>
+  dplyr::mutate(
+    height = readr::parse_number(height),
+    height = case_when(
+      height <= 2.5 ~ height * 100,
+      height <= 9 ~ NA_real_,
+      TRUE ~ height
+    )
+  )
+
+# Clean spain_budget
+df <- df |>
+  dplyr::mutate(spain_budget = replace(spain_budget, identifier == 19, 4000)) |>
+  dplyr::mutate(spain_budget = readr::parse_number(spain_budget))
+
+# work: "Doing internship during the vacation" -> I don't currently work
+df <- df |>
+  dplyr::mutate(work = replace(work, identifier == 197, "I don't currently work"))
+
+# lab_zoom: "When I am told to turn it on", "Only when asked to", etc -> "Some of the time"
+df <- df |>
+  dplyr::mutate(lab_zoom = replace(lab_zoom, !(lab_zoom %in% c("Most of the time", "Only in breakout rooms", "Some of the time", "Never", NA, "Never in zoom lab")), "Some of the time")) |>
+  dplyr::mutate(lab_zoom = replace(lab_zoom, lab_zoom == "Never in zoom lab", "Never"))
+
+# social_media:
+df = df %>% mutate(
+  social_media = tolower(social_media),
+  social_media = str_replace_all(social_media, '[[:punct:]]',' '),
+  social_media = stringr::word(social_media),
+  social_media = case_when(
+    stringr::str_starts(social_media,"ins") ~ "instagram",
+    stringr::str_starts(social_media,"ti") ~ "tiktok",
+    stringr::str_starts(social_media,"mess") ~ "facebook",
+    stringr::str_starts(social_media,"n") ~ "none",
+    is.na(social_media) ~ "none",
+    TRUE ~ social_media
+  ),
+  social_media = tools::toTitleCase(social_media),
+  social_media = forcats::fct_lump_min(social_media, min = 10)
+)
+
+# gender:
+df = df %>% mutate(
+  gender = gendercoder::recode_gender(gender)
+)
+
+
+# steak-preference:
+df = df |>
+  dplyr::mutate(steak_preference = replace(steak_preference, steak_preference == "Don't eat steak", "I don't eat beef")) |>
+  dplyr::mutate(steak_preference = replace(steak_preference, steak_preference == "fry:)", NA))
+
+
+# employment_hrs:
+df <- df |>
+  dplyr::mutate(employment_hrs = dplyr::case_when(
+    is.na(employment_hrs) & work == "Full time" ~ sapply(df[df$work=="Full time",
+                                                            "employment_hrs"],
+                                                         mean,
+                                                         na.rm = TRUE
+    ),
+    is.na(employment_hrs) & work == "Part time" ~ sapply(df[df$work=="Part time",
+                                                            "employment_hrs"],
+                                                         mean,
+                                                         na.rm = TRUE
+    ),
+    is.na(employment_hrs) & work == "Casual" ~ sapply(df[df$work=="Casual",
+                                                         "employment_hrs"],
+                                                      mean,
+                                                      na.rm = TRUE
+    ),
+    is.na(employment_hrs) & work == "Self employed" ~ sapply(df[df$work=="Self employed",
+                                                                "employment_hrs"],
+                                                             mean,
+                                                             na.rm = TRUE
+    ),
+    is.na(employment_hrs) & work == "Contractor" ~ sapply(df[df$work=="Contractor",
+                                                             "employment_hrs"],
+                                                          mean,
+                                                          na.rm = TRUE
+    ),
+    is.na(employment_hrs) & work == "I don't currently work" ~ sapply(df[df$work=="I don't currently work",
+                                                                         "employment_hrs"],
+                                                                      mean,
+                                                                      na.rm = TRUE
+    ),
+    TRUE ~ employment_hrs
+  )
+  )
+
+# weeks_behind: replace values which are larger than 8 with NA
+df <- df |>
+  dplyr::mutate(weeks_behind = replace(weeks_behind, weeks_behind >= 8, NA))
+
+
+
+# shoe_size: some use china sizing, some use japan. Change all to US
+df <- df |>
+  dplyr::mutate(shoe_size = replace(shoe_size, shoe_size==275, NA)) |>
+  dplyr::mutate(shoe_size = case_when(
+    shoe_size > 31 ~ round(4*(shoe_size - 30)/3)/2,
+    shoe_size <= 31 & shoe_size > 20 ~ round(2*(shoe_size-15))/2
+  ))
+
+
+
+
+# Remove absurd responses
+df <- df |>
+  subset(select=-city) |>
+  dplyr::mutate(study_hrs = replace(study_hrs, study_hrs >= 200, NA)) |>
+  dplyr::mutate(exercise_hrs = replace(exercise_hrs, exercise_hrs>=100, NA)) |>
+  dplyr::mutate(wam = replace(wam, wam<10, NA)) |>
+  # The identifiers below have multiple absurd responses.
+  dplyr::filter(!(identifier == "155")) |>
+  dplyr::filter(weekly_saving <= 4000)
+
+
+numeric_vars = c("height", "spain_budget", "feel_overseas", "feel_anxious", "study_hrs", "random_number", "exercise_hrs", "employment_hrs", "weekly_saving", "weeks_behind", "team_role", "data2x02_hrs", "social_media_hrs", "wam", "shoe_size")
+categorical_vars = c("covid_positive", "living_arrangements", "feel_overseas", "feel_anxious", "read_news", "study_load", "work", "lab_zoom", "social_media", "gender", "steak_preference", "dominant_hand", "normal_advanced", "hourly_plan", "assignment_on_time", "used_r_before", "team_role", "uni_year", "decade_selection")
+
+
+# Actual app below ______________________________________________________________________________________________________________________________________________________________________________________________________________
+# _______________________________________________________________________________________________________________________________________________________________________________________________________________________________
+# _______________________________________________________________________________________________________________________________________________________________________________________________________________________________
+# _______________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(title="DATA2X02 Survey Analysis",
+                    
                     # Application title
                     dashboardHeader(title="DATA2X02 Survey",
                                     dropdownMenu(
@@ -59,6 +196,15 @@ ui <- dashboardPage(title="DATA2X02 Survey Analysis",
                                       }")
                                  ),
                       
+                      withMathJax(),
+                      # section below allows in-line LaTeX via $ in mathjax. Replace less-than-sign with < 
+                      # and grater-than-sign with >
+                      tags$div(HTML("<script type='text/x-mathjax-config'>
+                                      MathJax.Hub.Config({
+                                      tex2jax: {inlineMath: [['$','$']]}
+                                      });
+                                      </script>
+                                      ")),
                       
                       # Tabs ___________________________________________________________________________________
                       tabItems(
@@ -76,40 +222,160 @@ ui <- dashboardPage(title="DATA2X02 Survey Analysis",
                                     
                         # Data Tables ___________________________________________________________________________________
                         
-                                    tabItem(tabName="dtable", DT::dataTableOutput("raw_data", width="100%")),
+                                    tabItem(tabName="dtable", DT::dataTableOutput("fdata", width="100%")),
                         
                         
                         # Visualisations ___________________________________________________________________________________
+                        
+                        # Histogram
                                     tabItem(tabName="vis_hist",
-                                            box(width=12,
-                                                column(width=6, "Hello World, it's item2!"),
-                                                column(width=6, "Test")
+                                            fluidRow(
+                                              box(width=3, title="Controls",
+                                                  selectInput("Xhist",
+                                                              "Select Histogram Variable",
+                                                              choices=numeric_vars,
+                                                              selected="height"),
+                                                  shiny::checkboxInput("ManyHist",
+                                                              "Split Histogram into Groups",
+                                                              value=FALSE),
+                                                  uiOutput("HistColor")
+                                                  ),
+                                              box(width=9, title="Histogram", plotOutput("plot_hist"))
                                             )
                                     ),
+                        
+                        # Scatter Plot
                                     tabItem(tabName="vis_scat",
-                                            box(width=12,
-                                                column(width=6, "Hello World, it's item2!"),
-                                                column(width=6, "Test")
+                                            fluidRow(
+                                              box(width=3, title="Controls",
+                                                  selectInput("Xscat",
+                                                              "Select X Variable",
+                                                              choices=numeric_vars,
+                                                              selected="height"),
+                                                  selectInput("Yscat",
+                                                              "Select Y Variable",
+                                                              choices=numeric_vars,
+                                                              selected="weekly_saving"),
+                                                  shiny::checkboxInput("Cscat",
+                                                                       "Color by Group",
+                                                                       value=FALSE),
+                                                  uiOutput("ScatColor")
+                                              ),
+                                              box(width=9, title="Scatter Plot", plotOutput("plot_scat"))
                                             )
                                     ),
+                        
+                        # Box Plot
                                     tabItem(tabName="vis_box",
-                                            box(width=12,
-                                                column(width=6, "Hello World, it's item2!"),
-                                                column(width=6, "Test")
+                                            fluidRow(
+                                              box(width=3, title="Controls",
+                                                  selectInput("Xscat",
+                                                              "Select Boxplot Variable",
+                                                              choices=numeric_vars,
+                                                              selected="height"),
+                                                  shiny::checkboxInput("Mbox",
+                                                                       "Compare Groups",
+                                                                       value=FALSE),
+                                                  uiOutput("BoxMany")
+                                              ),
+                                              box(width=9, title="Box Plot", plotOutput("plot_box"))
                                             )
                                     ),
+                        
+                        # Q-Q Plot
                                     tabItem(tabName="vis_qqplot",
-                                            box(width=12,
-                                                column(width=6, "Hello World, it's item2!"),
-                                                column(width=6, "Test")
+                                            fluidRow(
+                                              box(width=3, title="Controls",
+                                                  selectInput("Xqq",
+                                                              "Select Q-Q plot Variable",
+                                                              choices=numeric_vars,
+                                                              selected="height"),
+                                                  shiny::checkboxInput("Mqq",
+                                                                       "Compare Groups",
+                                                                       value=FALSE),
+                                                  uiOutput("qqMany")
+                                              ),
+                                              box(width=9, title="Q-Q Plot", plotOutput("plot_qq"))
                                             )
-                                    )
+                                    ),
                         
                         
                         # Hypothesis Tests ___________________________________________________________________________________
+                        
+                                    tabItem(tabName="ttest",
+                                            fluidRow(
+                                              column(width=3,
+                                                     box(width=12, title="Controls",
+                                                         selectInput("tvar",
+                                                                     HTML("<b>Type of t-test:</b>"),
+                                                                     choices=c("One sample", "Two sample"),
+                                                                     selected="One sample"),
+                                                         selectInput("talternative",
+                                                                     HTML("<b>Alternative hypothesis:</b>"),
+                                                                     choices=c("Two-sided", "Upper-sided", "Lower-sided"),
+                                                                     selected="Two-sided"),
+                                                         uiOutput("tMany1")
+                                                     ),
+                                                     box(width=12, title="Variable Selection",
+                                                         selectInput("tvar",
+                                                                     HTML("<b>Quantitative Variable:</b>"),
+                                                                     choices=numeric_vars,
+                                                                     selected="height"),
+                                                         uiOutput("tMany2"),
+                                                         uiOutput("tMany3"),
+                                                         uiOutput("tMany4")
+                                                     )
+                                              ),
+                                              column(width=9,
+                                              box(width=12, title="Hypothesis Test",
+                                                  withMathJax(uiOutput("ttestOneSide"))
+                                              ))
+                                            )
+                                    ),
+                                    tabItem(tabName="WilcoxRStest",
+                                            fluidRow(
+                                              box(width=3, title="Controls",
+                                                  
+                                              ),
+                                              box(width=9, title="Hypothesis Test",
+                                                  
+                                              )
+                                            )
+                                    ),
+                                    tabItem(tabName="chi2test",
+                                            fluidRow(
+                                              box(width=3, title="Controls",
+                                                  
+                                              ),
+                                              box(width=9, title="Hypothesis Test",
+                                                  
+                                              )
+                                            )
+                                    )
+                        
                     )
                     )
 )
+
+
+
+
+
+
+
+
+
+
+
+
+
+# =============================================================================================================================================================================================================================================
+# =============================================================================================================================================================================================================================================
+# =======   S E R V E R  ======================================================================================================================================================================================================================
+# =============================================================================================================================================================================================================================================
+# =============================================================================================================================================================================================================================================
+
+
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
@@ -144,24 +410,161 @@ server <- function(input, output, session) {
   
   
   
-  # Data Tables ________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+  # _________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+  # Data Tables _____________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+  # _________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
   
-  output$raw_data <- DT::renderDataTable(raw_data, options = list(scrollX = TRUE))
-  
-  
-  
-  
+  output$fdata <- DT::renderDataTable(df, options = list(scrollX = TRUE))
   
   
-  # Visualisations ________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+  
+  
+  
+  
+  # _________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+  # Visualisations __________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+  # _________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
   
+  # Histogram ======================================
+  
+  output$plot_hist <- renderPlot({
+    x_fd = unlist(df[,input$Xhist])
+    fd=4*IQR(x_fd, na.rm=TRUE)/length(x_fd)^(1/3)
+    if (input$ManyHist == FALSE) {
+      df |> ggplot() + aes(x=.data[[input$Xhist]]) + stat_bin(aes(y=..density..), bins=fd)
+    } else {
+      subset(df, !is.na(df[, input$Chist])) |> ggplot() + aes(x=.data[[input$Xhist]], fill=.data[[input$Chist]]) + stat_bin(aes(y=..density..), bins=fd, color="#e9ecef", alpha=0.7)
+    }
+  })
+  
+  output$HistColor <- renderUI({
+    req(input$ManyHist)
+    selectInput("Chist",
+                "Select Grouping Variable",
+                choices=categorical_vars,
+                selected="normal_advanced")
+  })
+  
+  
+  # Scatter plot ===================================
+  
+  output$plot_scat <- renderPlot({
+    if (input$Cscat == FALSE) {
+      df |> ggplot() + aes(x=.data[[input$Xscat]], y=.data[[input$Yscat]]) + geom_point()
+    } else {
+      subset(df, !is.na(df[, input$ColorScat])) |> ggplot() + aes(x=.data[[input$Xscat]], y=.data[[input$Yscat]], color=.data[[input$ColorScat]]) + geom_point()
+    }
+  })
+  
+  output$ScatColor <- renderUI({
+    req(input$Cscat)
+    selectInput("ColorScat",
+                "Select Grouping Variable",
+                choices=categorical_vars,
+                selected="normal_advanced")
+  })
+  
+  
+  # Box plot =======================================
+  
+  output$plot_box <- renderPlot({
+    if (input$Mbox == FALSE) {
+      df |> ggplot() + aes(x=.data[[input$Xscat]]) + geom_boxplot()
+    } else {
+      subset(df, !is.na(df[, input$GBox])) |> ggplot() + aes(x=.data[[input$Xscat]], color=.data[[input$GBox]]) + geom_boxplot()
+    }
+  })
+  
+  output$BoxMany <- renderUI({
+    req(input$Mbox)
+    selectInput("GBox",
+                "Select Grouping Variable",
+                choices=categorical_vars,
+                selected="normal_advanced")
+  })
+  
+  
+  # Q-Q plot =======================================
+  
+  output$plot_qq <- renderPlot({
+    if (input$Mqq == FALSE) {
+      df |> ggplot() + aes(sample=.data[[input$Xqq]]) + geom_qq() + geom_qq_line()
+    } else {
+      subset(df, !is.na(df[, input$Gqq])) |> ggplot() + aes(sample=.data[[input$Xqq]]) + geom_qq() + geom_qq_line() + facet_grid(cols= vars(.data[[input$Gqq]]), labeller = "label_both")
+    }
+  })
+  
+  output$qqMany <- renderUI({
+    req(input$Mqq)
+    selectInput("Gqq",
+                "Select Grouping Variable",
+                choices=categorical_vars,
+                selected="normal_advanced")
+  })
   
   
   
-  
-  
+  # _________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
   # Hypothesis Tests ________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+  # _________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+  
+  output$tMany1 <- renderUI({
+    req(input$tvar == "One sample")
+    numericInput("tmu",
+                 HTML("<b>Expected mean:</b>"),
+                 min=0,
+                 step=0.1,
+                 value=0)
+  })
+  
+  output$tMany2 <- renderUI({
+    req(input$tvar == "Two sample")
+    selectInput("tvarsplit",
+                HTML("<b>Categorical Variable for Comparison of Two Samples:</b>"),
+                choices=categorical_vars,
+                selected="normal_advanced")
+  })
+  
+  output$tMany3 <- renderUI({
+    req(input$tvar == "Two sample")
+    subset_df = subset(df, !is.na(df[, input$tvarsplit]))
+    unique_vals = unique(subset_df[, input$tvarsplit])
+    selectInput("tsplit1",
+                HTML("<b>Sample 1 Category:</b>"),
+                choices=unique_vals)
+  })
+  
+  output$tMany4 <- renderUI({
+    req(input$tvar == "Two sample")
+    subset_df = subset(df, !is.na(df[, input$tvarsplit]))
+    unique_vals = unique(subset(df, !is.na(df[, input$tvarsplit]))[, input$tvarsplit])
+    unique_vals = unique_vals[unique_vals != input$tsplit1]
+    selectInput("tsplit2",
+                HTML("<b>Sample 2 Category:</b>"),
+                choices=unique_vals)
+  })
+  
+  output$ttestOneSide <- renderUI({
+    req(input$tvar == "One sample")
+    withMathJax(HTML(paste(
+      "<h2>Hypothesis</h2>",
+      paste0("<b>$H_0$</b>:", " sample mean is ", input$tmu),
+      if (input$talternative == "Two-sided"){
+        paste0(" vs <b>$H_1$</b>: sample mean is not equal to ", input$tmu, ".")
+      } else if (input$talternative == "Lower-sided") {
+        paste0(" vs <b>$H_1$</b>: sample mean is less than ", input$tmu, ".")
+      } else {
+        paste0(" vs <b>$H_1$</b>: sample mean is greater than ", input$tmu, ".")
+      },
+      "<h2>Assumptions:</h2>",
+      "<h2>Test Statistic</h2>",
+      "<h2>Observed Test Statistic</h2>",
+      "<h2>p-value</h2>",
+      "<h2>Decision</h2>"
+      )))
+  })
+  
 }
 
 # Run the application 

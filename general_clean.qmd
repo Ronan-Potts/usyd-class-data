@@ -77,8 +77,6 @@ graphics::hist(df$employment_hrs, main="", xlab=as.character(name_combo[name_com
 graphics::hist(df$weekly_saving, main="", xlab=as.character(name_combo[name_combo$New == "weekly_saving",2]))
 graphics::hist(df$data2x02_hrs, main="", xlab=as.character(name_combo[name_combo$New == "data2x02_hrs",2]))
 graphics::hist(df$wam, main="", xlab=as.character(name_combo[name_combo$New == "wam",2]))
-
-graphics::hist(df$height, main="", xlab=as.character(name_combo[name_combo$New == "wam",2]))
 ```
 
 Let's investigate the abnormal response of 100,000 hours spent studying per week. `r filter(df, study_hrs > 100)`
@@ -443,6 +441,19 @@ df <- df |>
 df <- df |>
   dplyr::mutate(weeks_behind = replace(weeks_behind, weeks_behind >= 8, NA))
 
+
+
+# shoe_size: some use china sizing, some use japan. Change all to US
+df <- df |>
+  dplyr::mutate(shoe_size = replace(shoe_size, shoe_size==275, NA)) |>
+  dplyr::mutate(shoe_size = case_when(
+                              shoe_size > 31 ~ round(4*(shoe_size - 30)/3)/2,
+                              shoe_size <= 31 & shoe_size > 20 ~ round(2*(shoe_size-15))/2
+                            ))
+
+
+
+
 # Remove absurd responses
 df <- df |>
   subset(select=-city) |>
@@ -458,9 +469,19 @@ df <- df |>
 
 # Cleaned:
 
-# covid_positive, living_arrangements, height, uni_travel_method, uni_travel_listen, spain_budget, feel_overseas, feel_anxious, study_hrs, read_news, study_load, work, lab_zoom, social_media, gender, sleep_time, wake_time, random_number, steak_preference, dominant_hand, normal_advanced, exercise_hrs, employment_hrs, city, weekly_saving, hourly_plan, weeks_behind, assignment_on_time, used_r_before, team_role, data2x02_hrs, 
+# covid_positive, living_arrangements, height, uni_travel_method, uni_travel_listen, spain_budget, feel_overseas, feel_anxious, study_hrs, read_news, study_load, work, lab_zoom, social_media, gender, sleep_time, wake_time, random_number, steak_preference, dominant_hand, normal_advanced, exercise_hrs, employment_hrs, city, weekly_saving, hourly_plan, weeks_behind, assignment_on_time, used_r_before, team_role, data2x02_hrs, social_media_hrs, uni_year, wam, shoe_size, decade_selection
 
 
 # Removal of NAs will be done dynamically in the application when a test is chosen.
 
+# Sport will be cleaned dynamically
+sport <- df |>
+  dplyr::select(identifier, sport) |> 
+  tidyr::separate_rows(sport,
+                       sep = ", ") |> 
+  dplyr::mutate(sport = tools::toTitleCase(sport),
+                sport = factor(sport),
+                sport = forcats::fct_lump_min(sport, 2))
+
+df
 ```
