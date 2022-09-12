@@ -1,7 +1,6 @@
 library(shiny)
 library(tidyverse)
 library(shinydashboard)
-library(plotly)
 
 #patchwork package for adding plots
 library(patchwork)
@@ -65,7 +64,7 @@ df = df %>% mutate(
 # gender:
 df = df %>% mutate(
   gender = gendercoder::recode_gender(gender)
-)
+) |> filter(gender != "non-binary")
 
 
 # steak-preference:
@@ -209,6 +208,11 @@ ui <- dashboardPage(title="DATA2X02 Survey Analysis",
                                       </script>
                                       ")),
                       
+                      # suppress warnings
+                      tags$style(type="text/css",
+                                 ".shiny-output-error { visibility: hidden; }",
+                                 ".shiny-output-error:before { visibility: hidden; }"
+                      ),
                       # Tabs ___________________________________________________________________________________
                       tabItems(
                         
@@ -315,7 +319,7 @@ ui <- dashboardPage(title="DATA2X02 Survey Analysis",
                                                                      selected="One sample"),
                                                          selectInput("talternative",
                                                                      HTML("<b>Alternative hypothesis:</b>"),
-                                                                     choices=c("Two-sided", "Upper-sided", "Lower-sided"),
+                                                                     choices=c("Two-sided", "Greater", "Less"),
                                                                      selected="Two-sided"),
                                                          uiOutput("tMany1")
                                                      ),
@@ -331,9 +335,9 @@ ui <- dashboardPage(title="DATA2X02 Survey Analysis",
                                               ),
                                               column(width=9,
                                               box(width=12, title="Hypothesis Test",
-                                                  withMathJax(uiOutput("ttestOneSide1")),
-                                                  plotOutput("ttestOneSide2"),
-                                                  withMathJax(uiOutput("ttestOneSide3"))
+                                                  withMathJax(uiOutput("ttestOneSample1")),
+                                                  plotOutput("ttestOneSample2"),
+                                                  withMathJax(uiOutput("ttestOneSample3"))
                                               ))
                                             )
                                     ),
@@ -550,24 +554,55 @@ server <- function(input, output, session) {
                 choices=unique_vals)
   })
   
-  output$ttestOneSide1 <- renderUI({
-    req(input$tvar == "One sample")
+  output$ttestOneSample1 <- renderUI({
+    if (input$tvar == "One sample") {
+    sw_test = shapiro.test(unlist(df[,input$tdata]))
     withMathJax(HTML(paste(
-      "<h2>Hypothesis</h2>",
+      "<h2>Hypothesis:</h2>",
       paste0("<b>$H_0$</b>:", " sample mean is ", input$tmu),
-      if (input$talternative == "Two-sided"){
+      if (input$talternative == "Two-sided") {
         paste0(" vs <b>$H_1$</b>: sample mean is not equal to ", input$tmu, ".")
-      } else if (input$talternative == "Lower-sided") {
+      } else if (input$talternative == "Less") {
         paste0(" vs <b>$H_1$</b>: sample mean is less than ", input$tmu, ".")
       } else {
         paste0(" vs <b>$H_1$</b>: sample mean is greater than ", input$tmu, ".")
       },
-      "<h2>Assumptions:</h2> by nature of the sampling method, the data is chosen at random from a population. Following the Shapiro-Wilk test for normality, " # ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ CONTINUE HERE
+      if (sw_test$p.value >= 0.05){
+        paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is not chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, the ", input$tdata, " data is normally distributed with $p = $", signif(sw_test$p.value, 2), ". The normality of the data is visualised in the Q-Q plot and Boxplot below.")
+      } else {
+        paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is not chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, the ", input$tdata, " data is NOT normally distributed with $p = $", signif(sw_test$p.value, 2), ", and hence the t-test should not be used. The normality of the data is visualised in the Q-Q plot and Boxplot below.")
+      }
     )))
+    } else {
+      data1 = unlist(df[df[,input$tvarsplit] == input$tsplit1, input$tdata])
+      data2 = unlist(df[df[,input$tvarsplit] == input$tsplit2, input$tdata])
+      sw_test1 = shapiro.test(data1)
+      sw_test2 = shapiro.test(data2)
+      withMathJax(HTML(paste(
+        "<h2>Hypothesis:</h2>",
+        paste0("<b>$H_0$</b>: sample mean of ", input$tsplit1, " data is equal to sample mean of ", input$tsplit2, " data."),
+        if (input$talternative == "Two-sided") {
+          paste0(" vs <b>$H_1$</b>: sample mean of ", input$tsplit1, " data is NOT equal to sample mean of ", input$tsplit2, " data.")
+        } else if (input$talternative == "Less") {
+          paste0(" vs <b>$H_1$</b>: sample mean of ", input$tsplit1, " data is less than sample mean of ", input$tsplit2, " data.")
+        } else {
+          paste0(" vs <b>$H_1$</b>: sample mean of ", input$tsplit1, " data is greater than sample mean of ", input$tsplit2, " data.")
+        },
+        if (sw_test1$p.value >= 0.05 & sw_test2$p.value >= 0.05) {
+          paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is not chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, both the ", input$tsplit1, " and ", input$tsplit2, " ", input$tdata, " data are normally distributed with $p = $", signif(sw_test1$p.value, 2), " and ", signif(sw_test2$p.value, 2), " respectively. The normality of the data is visualised in the Q-Q plots and Boxplots below.")
+        } else if (sw_test1$p.value < 0.05 & sw_test2$p.value < 0.05) {
+          paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is not chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, neither the ", input$tsplit1, " nor the ", input$tsplit2, " ", input$tdata, " data are normally distributed with $p = $", signif(sw_test1$p.value, 2), " and ", signif(sw_test2$p.value, 2), " respectively. Hence, the normality assumption is incorrect. The normality of the data is visualised in the Q-Q plots and Boxplots below.")
+        } else if (sw_test1$p.value < 0.05 & sw_test2$p.value >= 0.05) {
+          paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is not chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, the ", input$tsplit1, " ", input$tdata, " is NOT normally distributed while the ", input$tsplit2, " ", input$tdata, " data is normally distributed with $p = $", signif(sw_test1$p.value, 2), " and ", signif(sw_test2$p.value, 2), " respectively. Hence, the normality assumption is incorrect. The normality of the data is visualised in the Q-Q plots and Boxplots below.")
+        } else if (sw_test1$p.value >= 0.05 & sw_test2$p.value < 0.05) {
+          paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is not chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, the ", input$tsplit1, " ", input$tdata, " is normally distributed while the ", input$tsplit2, " ", input$tdata, " data is NOT normally distributed with $p = $", signif(sw_test1$p.value, 2), " and ", signif(sw_test2$p.value, 2), " respectively. Hence, the normality assumption is incorrect. The normality of the data is visualised in the Q-Q plots and Boxplots below.")
+        }
+      )))
+    }
   })
   
-  output$ttestOneSide2 <- renderPlot({
-    req(input$tvar == "One sample")
+  output$ttestOneSample2 <- renderPlot({
+    if (input$tvar == "One sample") {
     p1 <- df |>
       ggplot() +
       aes(sample = .data[[input$tdata]]) +
@@ -580,17 +615,78 @@ server <- function(input, output, session) {
       geom_boxplot()
     
     p1 + p2
+    } else {
+      subset_df = subset(df, unlist(df[,input$tvarsplit]) %in% c(input$tsplit1, input$tsplit2))
+      p1 <- subset_df |>
+        ggplot() +
+        aes(sample = .data[[input$tdata]]) +
+        geom_qq() +
+        geom_qq_line() +
+        labs(x="Standard normal quantiles", y=input$tdata) + 
+        facet_grid(cols=vars(eval(parse(text=input$tvarsplit))))
+      p2 <- subset_df |>
+        ggplot() +
+        aes(y = .data[[input$tdata]]) +
+        geom_boxplot() + 
+        facet_grid(cols=vars(eval(parse(text=input$tvarsplit))))
+      
+      p1 + p2
+    }
   })
   
-  output$ttestOneSide3 <- renderUI({
-    req(input$tvar == "One sample")
+  output$ttestOneSample3 <- renderUI({
+    if (input$tvar == "One sample") {
+    sw_test = shapiro.test(unlist(df[,input$tdata]))
+    if (input$talternative == "Two-sided") {
+      t_test = t.test(unlist(df[,input$tdata]), mu=input$tmu, alternative="two.sided")
+    } else if (input$talternative == "Greater") {
+      t_test = t.test(unlist(df[,input$tdata]), mu=input$tmu, alternative="greater")
+    } else {
+      t_test = t.test(unlist(df[,input$tdata]), mu=input$tmu, alternative="less")
+    }
     withMathJax(HTML(paste(
-      "<h2>Test Statistic</h2>",
-      "<h2>Observed Test Statistic</h2>",
-      "<h2>p-value</h2>",
-      "<h2>Decision</h2>"
+      "<h2>Observed Test Statistic:</h2> $t_0 = $", signif(t_test$statistic,2),
+      "<h2>p-value:</h2> $p = $", signif(t_test$p.value,2),
+      if (t_test$p.value > 0.05 & sw_test$p.value <= 0.05) {
+        paste0("<h2>Decision:</h2> Since $p > 0.05$, we cannot reject the null hypothesis and it is possible that the population mean of the DATA2X02 ", input$tdata, " data is equal to ", input$tmu, ". However, keep in mind that neither assumption was satisfied, meaning the t-test is not reliable.")
+      } else if (t_test$p.value > 0.05 & sw_test$p.value > 0.05) {
+        paste0("<h2>Decision:</h2> Since $p > 0.05$, we cannot reject the null hypothesis and it is possible that the population mean of the DATA2X02 ", input$tdata, " data is equal to ", input$tmu, ". However, keep in mind that the data was not randomly sampled from the DATA2X02 populatios, meaning the t-test is not reliable.")
+      } else if (t_test$p.value < 0.05 & sw_test$p.value <= 0.05) {
+        paste0("<h2>Decision:</h2> Since $p < 0.05$, we reject the null hypothesis in favour of the alternative hypothesis. However, keep in mind that neither assumption was satisfied, meaning the t-test is not reliable.")
+      } else {
+        paste0("<h2>Decision:</h2> Since $p < 0.05$, we reject the null hypothesis in favour of the alternative hypothesis. However, keep in mind that the data was not randomly sampled from the DATA2X02 populatios, meaning the t-test is not reliable.")
+      }
       )))
+    } else {
+      data1 = unlist(df[df[,input$tvarsplit] == input$tsplit1, input$tdata])
+      data2 = unlist(df[df[,input$tvarsplit] == input$tsplit2, input$tdata])
+      sw_test1 = shapiro.test(data1)
+      sw_test2 = shapiro.test(data2)
+      if (input$talternative == "Two-sided") {
+        t_test = t.test(data1, data2, alternative="two.sided")
+      } else if (input$talternative == "Greater") {
+        t_test = t.test(data1, data2, alternative="greater")
+      } else {
+        t_test = t.test(data1, data2, alternative="less")
+      }
+      withMathJax(HTML(paste(
+        "<h2>Observed Test Statistic:</h2> $t_0 = $", signif(t_test$statistic,2),
+        "<h2>p-value:</h2> $p = $", signif(t_test$p.value,2),
+        if (t_test$p.value > 0.05 & (sw_test1$p.value <= 0.05 | sw_test2$p.value <= 0.05)) {
+          paste0("<h2>Decision:</h2> Since $p > 0.05$, we cannot reject the null hypothesis and it is possible that the population means of the ", input$tsplit1, " and ", input$tsplit2, " ", input$tdata, " groups are equal. However, keep in mind that neither assumption was satisfied, meaning the t-test is not reliable.")
+        } else if (t_test$p.value > 0.05 & sw_test1$p.value > 0.05 & sw_test2$p.value > 0.05) {
+          paste0("<h2>Decision:</h2> Since $p > 0.05$, we cannot reject the null hypothesis and it is possible that the population means of the ", input$tsplit1, " and ", input$tsplit2, " ", input$tdata, " groups are equal. However, keep in mind that the data was not randomly sampled from the DATA2X02 populatios, meaning the t-test is not reliable.")
+        } else if (t_test$p.value < 0.05 & (sw_test1$p.value <= 0.05 | sw_test2$p.value <= 0.05)) {
+          paste0("<h2>Decision:</h2> Since $p < 0.05$, we reject the null hypothesis in favour of the alternative hypothesis. However, keep in mind that neither assumption was satisfied, meaning the t-test is not reliable.")
+        } else {
+          paste0("<h2>Decision:</h2> Since $p < 0.05$, we reject the null hypothesis in favour of the alternative hypothesis. However, keep in mind that the data was not randomly sampled from the DATA2X02 populatios, meaning the t-test is not reliable.")
+        }
+      )))
+    }
   })
+  
+  
+  
   
 }
 
