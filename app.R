@@ -3,6 +3,9 @@ library(tidyverse)
 library(shinydashboard)
 library(plotly)
 
+#patchwork package for adding plots
+library(patchwork)
+
 
 # Data cleaning 
 # _______________________________________________________________________________________________________________________________________________________________________________________________________________________________
@@ -317,7 +320,7 @@ ui <- dashboardPage(title="DATA2X02 Survey Analysis",
                                                          uiOutput("tMany1")
                                                      ),
                                                      box(width=12, title="Variable Selection",
-                                                         selectInput("tvar",
+                                                         selectInput("tdata",
                                                                      HTML("<b>Quantitative Variable:</b>"),
                                                                      choices=numeric_vars,
                                                                      selected="height"),
@@ -328,7 +331,9 @@ ui <- dashboardPage(title="DATA2X02 Survey Analysis",
                                               ),
                                               column(width=9,
                                               box(width=12, title="Hypothesis Test",
-                                                  withMathJax(uiOutput("ttestOneSide"))
+                                                  withMathJax(uiOutput("ttestOneSide1")),
+                                                  plotOutput("ttestOneSide2"),
+                                                  withMathJax(uiOutput("ttestOneSide3"))
                                               ))
                                             )
                                     ),
@@ -545,7 +550,7 @@ server <- function(input, output, session) {
                 choices=unique_vals)
   })
   
-  output$ttestOneSide <- renderUI({
+  output$ttestOneSide1 <- renderUI({
     req(input$tvar == "One sample")
     withMathJax(HTML(paste(
       "<h2>Hypothesis</h2>",
@@ -557,7 +562,29 @@ server <- function(input, output, session) {
       } else {
         paste0(" vs <b>$H_1$</b>: sample mean is greater than ", input$tmu, ".")
       },
-      "<h2>Assumptions:</h2>",
+      "<h2>Assumptions:</h2> by nature of the sampling method, the data is chosen at random from a population. Following the Shapiro-Wilk test for normality, " # ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ CONTINUE HERE
+    )))
+  })
+  
+  output$ttestOneSide2 <- renderPlot({
+    req(input$tvar == "One sample")
+    p1 <- df |>
+      ggplot() +
+      aes(sample = .data[[input$tdata]]) +
+      geom_qq() +
+      geom_qq_line() +
+      labs(x="Standard normal quantiles", y=input$tdata)
+    p2 <- df |>
+      ggplot() +
+      aes(y = .data[[input$tdata]]) +
+      geom_boxplot()
+    
+    p1 + p2
+  })
+  
+  output$ttestOneSide3 <- renderUI({
+    req(input$tvar == "One sample")
+    withMathJax(HTML(paste(
       "<h2>Test Statistic</h2>",
       "<h2>Observed Test Statistic</h2>",
       "<h2>p-value</h2>",
