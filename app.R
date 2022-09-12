@@ -175,7 +175,6 @@ ui <- dashboardPage(title="DATA2X02 Survey Analysis",
                                  ),
                         menuItem(text="Hypothesis Tests", icon = icon("magnifying-glass", tabName="hypothesis_tests"),
                                  menuSubItem("T-Test", tabName = "ttest"),
-                                 menuSubItem("Wilcoxon Rank-Sum Test", tabName = "WilcoxRStest"),
                                  menuSubItem("Chi-Square Test", tabName = "chi2test")
                                  )
                       )),
@@ -341,24 +340,32 @@ ui <- dashboardPage(title="DATA2X02 Survey Analysis",
                                               ))
                                             )
                                     ),
-                                    tabItem(tabName="WilcoxRStest",
-                                            fluidRow(
-                                              box(width=3, title="Controls",
-                                                  
-                                              ),
-                                              box(width=9, title="Hypothesis Test",
-                                                  
-                                              )
-                                            )
-                                    ),
                                     tabItem(tabName="chi2test",
                                             fluidRow(
-                                              box(width=3, title="Controls",
-                                                  
+                                              column(width=3,
+                                                     box(width=12, title="Controls",
+                                                         selectInput("chitype",
+                                                                     HTML("<b>Type of t-test:</b>"),
+                                                                     choices=c("Uniform Goodness of Fit", "Homogeneity", "Independence", "Permutation"),
+                                                                     selected="Uniform Goodness of Fit"),
+                                                         uiOutput("chiControl1"),
+                                                         uiOutput("chiControl2")
+                                                     ),
+                                                     box(width=12, title="Variable Selection",
+                                                         selectInput("chidata",
+                                                                     HTML("<b>Categorical Variable:</b>"),
+                                                                     choices=categorical_vars,
+                                                                     selected="steak_preference"),
+                                                         uiOutput("chiSelect1"),
+                                                         uiOutput("chiSelect2")
+                                                     )
                                               ),
-                                              box(width=9, title="Hypothesis Test",
-                                                  
-                                              )
+                                              column(width=9,
+                                                     box(width=12, title="Hypothesis Test",
+                                                         withMathJax(uiOutput("chiTest1")),
+                                                         plotOutput("chiTest2"),
+                                                         withMathJax(uiOutput("chiTest3"))
+                                                     ))
                                             )
                                     )
                         
@@ -685,6 +692,80 @@ server <- function(input, output, session) {
     }
   })
   
+  
+  
+  output$chiControl1 <- renderUI({
+    if (input$chitype == "Permutation") {
+      numericInput("chiMonteNum",
+                   "Number of Samples:",
+                   min=1,
+                   step=10,
+                   value=100)
+    }
+  })
+  
+  output$chiControl2 <- renderUI({
+    if (input$chitype == "Permutation") {
+      shiny::checkboxInput("chiPermNumber",
+                    "Are you comparing multiple sample groups?",
+                    value=FALSE)
+    }
+  })
+  
+  
+  output$chiSelect1 <- renderUI({
+    if (input$chitype %in% c("Homogeneity", "Independence", "Permutation")) {
+      if (input$chitype == "Permutation") {
+        if (!input$chiPermNumber) {
+          
+        } else {
+          selectInput("chigroupvar",
+                      HTML("<b>Categorical Variable for Comparison of Two Samples:</b>"),
+                      choices=categorical_vars[categorical_vars != input$chidata],
+                      selected="normal_advanced")
+        }
+      } else {
+      selectInput("chigroupvar",
+                  HTML("<b>Categorical Variable for Comparison of Two Samples:</b>"),
+                  choices=categorical_vars[categorical_vars != input$chidata],
+                  selected="normal_advanced")
+      }
+    }
+  })
+  
+  output$chiSelect2 <- renderUI({
+    if (input$chitype %in% c("Homogeneity", "Independence", "Permutation")) {
+      if (input$chitype == "Permutation") {
+        if (input$chiPermNumber == FALSE) {
+          
+        } else {
+          selectInput("chiSamples",
+                      HTML("<b>Select Groups to Compare:</b>"),
+                      choices=unique(df[!is.na(df[,input$chigroupvar]),input$chigroupvar]),
+                      multiple=TRUE
+          )
+        }
+      } else {
+      selectInput("chiSamples",
+                  HTML("<b>Select Groups to Compare:</b>"),
+                  choices=unique(df[!is.na(df[,input$chigroupvar]),input$chigroupvar]),
+                  multiple=TRUE
+                  )
+      }
+    }
+  })
+  
+  output$chiTest1 <- renderUI({
+    
+  })
+  
+  output$chiTest2 <- renderUI({
+    
+  })
+  
+  output$chiTest3 <- renderUI({
+    
+  })
   
   
   
