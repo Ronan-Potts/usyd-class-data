@@ -1,7 +1,6 @@
 library(shiny)
 library(tidyverse)
 library(shinydashboard)
-library(rhandsontable)
 
 #patchwork package for adding plots
 library(patchwork)
@@ -433,7 +432,6 @@ server <- function(input, output, session) {
                "<b>Shiny:</b>",
                "<b>Shinydashboard:</b>",
                "<b>DT:</b> used to create the interactive data tables. Find more information <a href='https://rstudio.github.io/DT/'>here</a>.",
-               "<b>rhandsontable</b> used for table in chi square test",
                sep="<br><br>"))
   })
   output$author_text <- renderUI({
