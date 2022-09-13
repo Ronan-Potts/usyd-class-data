@@ -1,6 +1,7 @@
 library(shiny)
 library(tidyverse)
 library(shinydashboard)
+library(rhandsontable)
 
 #patchwork package for adding plots
 library(patchwork)
@@ -347,7 +348,7 @@ ui <- dashboardPage(title="DATA2X02 Survey Analysis",
                                                          selectInput("chitype",
                                                                      HTML("<b>Type of t-test:</b>"),
                                                                      choices=c("Uniform Goodness of Fit", "Homogeneity", "Independence", "Permutation"),
-                                                                     selected="Uniform Goodness of Fit"),
+                                                                     selected="Permutation"),
                                                          uiOutput("chiControl1"),
                                                          uiOutput("chiControl2")
                                                      ),
@@ -363,7 +364,7 @@ ui <- dashboardPage(title="DATA2X02 Survey Analysis",
                                               column(width=9,
                                                      box(width=12, title="Hypothesis Test",
                                                          withMathJax(uiOutput("chiTest1")),
-                                                         plotOutput("chiTest2"),
+                                                         uiOutput("chiTest2"),
                                                          withMathJax(uiOutput("chiTest3"))
                                                      ))
                                             )
@@ -417,6 +418,7 @@ server <- function(input, output, session) {
                "<b>Shiny:</b>",
                "<b>Shinydashboard:</b>",
                "<b>DT:</b> used to create the interactive data tables. Find more information <a href='https://rstudio.github.io/DT/'>here</a>.",
+               "<b>rhandsontable</b> used for table in chi square test",
                sep="<br><br>"))
   })
   output$author_text <- renderUI({
@@ -568,16 +570,16 @@ server <- function(input, output, session) {
       "<h2>Hypothesis:</h2>",
       paste0("<b>$H_0$</b>:", " sample mean is ", input$tmu),
       if (input$talternative == "Two-sided") {
-        paste0(" vs <b>$H_1$</b>: sample mean is not equal to ", input$tmu, ".")
+        paste0(" vs <b>$H_1$</b>: sample mean is <b>NOT</b> equal to ", input$tmu, ".")
       } else if (input$talternative == "Less") {
         paste0(" vs <b>$H_1$</b>: sample mean is less than ", input$tmu, ".")
       } else {
         paste0(" vs <b>$H_1$</b>: sample mean is greater than ", input$tmu, ".")
       },
       if (sw_test$p.value >= 0.05){
-        paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is not chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, the ", input$tdata, " data is normally distributed with $p = $", signif(sw_test$p.value, 2), ". The normality of the data is visualised in the Q-Q plot and Boxplot below.")
+        paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is <b>NOT</b> chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, the ", input$tdata, " data is normally distributed with $p = $", signif(sw_test$p.value, 2), ". The normality of the data is visualised in the Q-Q plot and Boxplot below.")
       } else {
-        paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is not chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, the ", input$tdata, " data is NOT normally distributed with $p = $", signif(sw_test$p.value, 2), ", and hence the t-test should not be used. The normality of the data is visualised in the Q-Q plot and Boxplot below.")
+        paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is <b>NOT</b> chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, the ", input$tdata, " data is <b>NOT</b> normally distributed with $p = $", signif(sw_test$p.value, 2), ", and hence the t-test should <b>NOT</b> be used. The normality of the data is visualised in the Q-Q plot and Boxplot below.")
       }
     )))
     } else {
@@ -589,20 +591,20 @@ server <- function(input, output, session) {
         "<h2>Hypothesis:</h2>",
         paste0("<b>$H_0$</b>: sample mean of ", input$tsplit1, " data is equal to sample mean of ", input$tsplit2, " data."),
         if (input$talternative == "Two-sided") {
-          paste0(" vs <b>$H_1$</b>: sample mean of ", input$tsplit1, " data is NOT equal to sample mean of ", input$tsplit2, " data.")
+          paste0(" vs <b>$H_1$</b>: sample mean of ", input$tsplit1, " data is <b>NOT</b> equal to sample mean of ", input$tsplit2, " data.")
         } else if (input$talternative == "Less") {
           paste0(" vs <b>$H_1$</b>: sample mean of ", input$tsplit1, " data is less than sample mean of ", input$tsplit2, " data.")
         } else {
           paste0(" vs <b>$H_1$</b>: sample mean of ", input$tsplit1, " data is greater than sample mean of ", input$tsplit2, " data.")
         },
         if (sw_test1$p.value >= 0.05 & sw_test2$p.value >= 0.05) {
-          paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is not chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, both the ", input$tsplit1, " and ", input$tsplit2, " ", input$tdata, " data are normally distributed with $p = $", signif(sw_test1$p.value, 2), " and ", signif(sw_test2$p.value, 2), " respectively. The normality of the data is visualised in the Q-Q plots and Boxplots below.")
+          paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is <b>NOT</b> chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, both the ", input$tsplit1, " and ", input$tsplit2, " ", input$tdata, " data are normally distributed with $p = $", signif(sw_test1$p.value, 2), " and ", signif(sw_test2$p.value, 2), " respectively. The normality of the data is visualised in the Q-Q plots and Boxplots below.")
         } else if (sw_test1$p.value < 0.05 & sw_test2$p.value < 0.05) {
-          paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is not chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, neither the ", input$tsplit1, " nor the ", input$tsplit2, " ", input$tdata, " data are normally distributed with $p = $", signif(sw_test1$p.value, 2), " and ", signif(sw_test2$p.value, 2), " respectively. Hence, the normality assumption is incorrect. The normality of the data is visualised in the Q-Q plots and Boxplots below.")
+          paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is <b>NOT</b> chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, neither the ", input$tsplit1, " nor the ", input$tsplit2, " ", input$tdata, " data are normally distributed with $p = $", signif(sw_test1$p.value, 2), " and ", signif(sw_test2$p.value, 2), " respectively. Hence, the normality assumption is incorrect. The normality of the data is visualised in the Q-Q plots and Boxplots below.")
         } else if (sw_test1$p.value < 0.05 & sw_test2$p.value >= 0.05) {
-          paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is not chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, the ", input$tsplit1, " ", input$tdata, " is NOT normally distributed while the ", input$tsplit2, " ", input$tdata, " data is normally distributed with $p = $", signif(sw_test1$p.value, 2), " and ", signif(sw_test2$p.value, 2), " respectively. Hence, the normality assumption is incorrect. The normality of the data is visualised in the Q-Q plots and Boxplots below.")
+          paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is <b>NOT</b> chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, the ", input$tsplit1, " ", input$tdata, " is <b>NOT</b> normally distributed while the ", input$tsplit2, " ", input$tdata, " data is normally distributed with $p = $", signif(sw_test1$p.value, 2), " and ", signif(sw_test2$p.value, 2), " respectively. Hence, the normality assumption is incorrect. The normality of the data is visualised in the Q-Q plots and Boxplots below.")
         } else if (sw_test1$p.value >= 0.05 & sw_test2$p.value < 0.05) {
-          paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is not chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, the ", input$tsplit1, " ", input$tdata, " is normally distributed while the ", input$tsplit2, " ", input$tdata, " data is NOT normally distributed with $p = $", signif(sw_test1$p.value, 2), " and ", signif(sw_test2$p.value, 2), " respectively. Hence, the normality assumption is incorrect. The normality of the data is visualised in the Q-Q plots and Boxplots below.")
+          paste0("<h2>Assumptions:</h2> By the nature of the sampling method, the data is <b>NOT</b> chosen at random from a population. Following the Shapiro-Wilk test for normality with a 0.05 level of confidence, the ", input$tsplit1, " ", input$tdata, " is normally distributed while the ", input$tsplit2, " ", input$tdata, " data is <b>NOT</b> normally distributed with $p = $", signif(sw_test1$p.value, 2), " and ", signif(sw_test2$p.value, 2), " respectively. Hence, the normality assumption is incorrect. The normality of the data is visualised in the Q-Q plots and Boxplots below.")
         }
       )))
     }
@@ -655,13 +657,13 @@ server <- function(input, output, session) {
       "<h2>Observed Test Statistic:</h2> $t_0 = $", signif(t_test$statistic,2),
       "<h2>p-value:</h2> $p = $", signif(t_test$p.value,2),
       if (t_test$p.value > 0.05 & sw_test$p.value <= 0.05) {
-        paste0("<h2>Decision:</h2> Since $p > 0.05$, we cannot reject the null hypothesis and it is possible that the population mean of the DATA2X02 ", input$tdata, " data is equal to ", input$tmu, ". However, keep in mind that neither assumption was satisfied, meaning the t-test is not reliable.")
+        paste0("<h2>Decision:</h2> Since $p > 0.05$, we cannot reject the null hypothesis and it is possible that the population mean of the DATA2X02 ", input$tdata, " data is equal to ", input$tmu, ". However, keep in mind that neither assumption was satisfied, meaning the t-test is <b>NOT</b> reliable.")
       } else if (t_test$p.value > 0.05 & sw_test$p.value > 0.05) {
-        paste0("<h2>Decision:</h2> Since $p > 0.05$, we cannot reject the null hypothesis and it is possible that the population mean of the DATA2X02 ", input$tdata, " data is equal to ", input$tmu, ". However, keep in mind that the data was not randomly sampled from the DATA2X02 populatios, meaning the t-test is not reliable.")
+        paste0("<h2>Decision:</h2> Since $p > 0.05$, we cannot reject the null hypothesis and it is possible that the population mean of the DATA2X02 ", input$tdata, " data is equal to ", input$tmu, ". However, keep in mind that the data was <b>NOT</b> randomly sampled from the DATA2X02 populatios, meaning the t-test is <b>NOT</b> reliable.")
       } else if (t_test$p.value < 0.05 & sw_test$p.value <= 0.05) {
-        paste0("<h2>Decision:</h2> Since $p < 0.05$, we reject the null hypothesis in favour of the alternative hypothesis. However, keep in mind that neither assumption was satisfied, meaning the t-test is not reliable.")
+        paste0("<h2>Decision:</h2> Since $p < 0.05$, we reject the null hypothesis in favour of the alternative hypothesis. However, keep in mind that neither assumption was satisfied, meaning the t-test is <b>NOT</b> reliable.")
       } else {
-        paste0("<h2>Decision:</h2> Since $p < 0.05$, we reject the null hypothesis in favour of the alternative hypothesis. However, keep in mind that the data was not randomly sampled from the DATA2X02 populatios, meaning the t-test is not reliable.")
+        paste0("<h2>Decision:</h2> Since $p < 0.05$, we reject the null hypothesis in favour of the alternative hypothesis. However, keep in mind that the data was <b>NOT</b> randomly sampled from the DATA2X02 populatios, meaning the t-test is <b>NOT</b> reliable.")
       }
       )))
     } else {
@@ -680,13 +682,13 @@ server <- function(input, output, session) {
         "<h2>Observed Test Statistic:</h2> $t_0 = $", signif(t_test$statistic,2),
         "<h2>p-value:</h2> $p = $", signif(t_test$p.value,2),
         if (t_test$p.value > 0.05 & (sw_test1$p.value <= 0.05 | sw_test2$p.value <= 0.05)) {
-          paste0("<h2>Decision:</h2> Since $p > 0.05$, we cannot reject the null hypothesis and it is possible that the population means of the ", input$tsplit1, " and ", input$tsplit2, " ", input$tdata, " groups are equal. However, keep in mind that neither assumption was satisfied, meaning the t-test is not reliable.")
+          paste0("<h2>Decision:</h2> Since $p > 0.05$, we cannot reject the null hypothesis and it is possible that the population means of the ", input$tsplit1, " and ", input$tsplit2, " ", input$tdata, " groups are equal. However, keep in mind that neither assumption was satisfied, meaning the t-test is <b>NOT</b> reliable.")
         } else if (t_test$p.value > 0.05 & sw_test1$p.value > 0.05 & sw_test2$p.value > 0.05) {
-          paste0("<h2>Decision:</h2> Since $p > 0.05$, we cannot reject the null hypothesis and it is possible that the population means of the ", input$tsplit1, " and ", input$tsplit2, " ", input$tdata, " groups are equal. However, keep in mind that the data was not randomly sampled from the DATA2X02 populatios, meaning the t-test is not reliable.")
+          paste0("<h2>Decision:</h2> Since $p > 0.05$, we cannot reject the null hypothesis and it is possible that the population means of the ", input$tsplit1, " and ", input$tsplit2, " ", input$tdata, " groups are equal. However, keep in mind that the data was <b>NOT</b> randomly sampled from the DATA2X02 populatios, meaning the t-test is <b>NOT</b> reliable.")
         } else if (t_test$p.value < 0.05 & (sw_test1$p.value <= 0.05 | sw_test2$p.value <= 0.05)) {
-          paste0("<h2>Decision:</h2> Since $p < 0.05$, we reject the null hypothesis in favour of the alternative hypothesis. However, keep in mind that neither assumption was satisfied, meaning the t-test is not reliable.")
+          paste0("<h2>Decision:</h2> Since $p < 0.05$, we reject the null hypothesis in favour of the alternative hypothesis. However, keep in mind that neither assumption was satisfied, meaning the t-test is <b>NOT</b> reliable.")
         } else {
-          paste0("<h2>Decision:</h2> Since $p < 0.05$, we reject the null hypothesis in favour of the alternative hypothesis. However, keep in mind that the data was not randomly sampled from the DATA2X02 populatios, meaning the t-test is not reliable.")
+          paste0("<h2>Decision:</h2> Since $p < 0.05$, we reject the null hypothesis in favour of the alternative hypothesis. However, keep in mind that the data was <b>NOT</b> randomly sampled from the DATA2X02 populatios, meaning the t-test is <b>NOT</b> reliable.")
         }
       )))
     }
@@ -741,14 +743,14 @@ server <- function(input, output, session) {
         } else {
           selectInput("chiSamples",
                       HTML("<b>Select Groups to Compare:</b>"),
-                      choices=unique(df[!is.na(df[,input$chigroupvar]),input$chigroupvar]),
+                      choices=unique(subset(df, !is.na(df[, input$chigroupvar]))[,input$chigroupvar]),
                       multiple=TRUE
           )
         }
       } else {
       selectInput("chiSamples",
                   HTML("<b>Select Groups to Compare:</b>"),
-                  choices=unique(df[!is.na(df[,input$chigroupvar]),input$chigroupvar]),
+                  choices=unique(subset(df, !is.na(df[, input$chigroupvar]))[,input$chigroupvar]),
                   multiple=TRUE
                   )
       }
@@ -756,14 +758,43 @@ server <- function(input, output, session) {
   })
   
   output$chiTest1 <- renderUI({
-    
+    withMathJax(HTML(paste(
+    if ((input$chitype %in% c("Homogeneity", "Independence")) | (input$chitype == "Permutation" & input$chiPermNumber == TRUE)) {
+      paste0("<h2>Hypothesis:</h2> $H_0: p_{ij} = p_{*j} = y_{*j}/n$ i.e. the proportion of counts in each column of the contingency table are equal across rows. $H_1: p_{ij}$ is <b>NOT</b> equal to $p_{*j}$.")
+    } else {
+      paste0("<h2>Hypothesis:</h2> $H_0:$ the proportions in each category $(p_i)$ are equal. $H_1:$ the proportions in each category $(p_1)$ are <b>NOT</b> equal.")
+    }
+      )))
   })
   
+  # output$chiTest2 <- renderUI({
+  #   if ((input$chitype == "Uniform Goodness of Fit") | (input$chitype == "Permutation" & input$chiPermNumber == FALSE)) {
+  #     if (input$chitype == "Permutation" & input$chiPermNumber == TRUE) {
+  #       unique_samples = unique(subset(df, !is.na(df[, input$chiSamples]))[,input$chiSamples])
+  #     } else {
+  #       unique_samples = input$chidata
+  #     }
+  #     unique_data_options = unique(df[!is.na(df[,input$chidata]),input$chidata])
+  #     r = length(unlist(unique_samples))
+  #     c = length(unlist(unique_data_options))
+  #     mat = matrix(data=1/c, r, c)
+  #     rhandsontable(mat, colHeaders = unname(unlist(unique_data_options)), rowHeaders = unname(unlist(unique_samples)))
+  #   }
+  # })
+  
   output$chiTest2 <- renderUI({
+    withMathJax(HTML(paste(
+      paste0("<h2>Assumptions:</h2>")
+    )))
     
   })
   
   output$chiTest3 <- renderUI({
+    withMathJax(HTML(paste(
+      paste0("<h2>Observed Test Statistic:</h2>"),
+      paste0("<h2>p-value:</h2>"),
+      paste0("<h2>Decision:</h2>")
+    )))
     
   })
   
