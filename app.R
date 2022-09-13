@@ -195,7 +195,22 @@ ui <- dashboardPage(title="DATA2X02 Survey Analysis",
                                       border-color:#3c8dbc;
                                       border-width:2px;
                                       border-top-width:0px;
-                                      }")
+                                      }"),
+                                 HTML(".dataTables_filter {
+                                   display: none;
+                                 }"),
+                                 HTML(".dataTables_scrollHead {
+                                   display: none;
+                                 }"),
+                                 HTML(".dataTables_info {
+                                   display: none;
+                                 }"),
+                                 HTML(".dataTables_paginate {
+                                   display: none;
+                                 }"),
+                                 HTML(".dataTables_length {
+                                   display: none;
+                                 }")
                                  ),
                       
                       withMathJax(),
@@ -347,7 +362,7 @@ ui <- dashboardPage(title="DATA2X02 Survey Analysis",
                                                      box(width=12, title="Controls",
                                                          selectInput("chitype",
                                                                      HTML("<b>Type of t-test:</b>"),
-                                                                     choices=c("Uniform Goodness of Fit", "Homogeneity", "Independence", "Permutation"),
+                                                                     choices=c("Uniform Goodness of Fit", "Independence", "Permutation"),
                                                                      selected="Permutation"),
                                                          uiOutput("chiControl1"),
                                                          uiOutput("chiControl2")
@@ -364,7 +379,7 @@ ui <- dashboardPage(title="DATA2X02 Survey Analysis",
                                               column(width=9,
                                                      box(width=12, title="Hypothesis Test",
                                                          withMathJax(uiOutput("chiTest1")),
-                                                         uiOutput("chiTest2"),
+                                                         DT::dataTableOutput("chiTest2"),
                                                          withMathJax(uiOutput("chiTest3"))
                                                      ))
                                             )
@@ -394,7 +409,6 @@ ui <- dashboardPage(title="DATA2X02 Survey Analysis",
 
 
 
-# Define server logic required to draw a histogram
 server <- function(input, output, session) {
   
   # Home Page ________________________________________________________________________________________________________________________________________________________________________________________________________________________________
@@ -716,7 +730,7 @@ server <- function(input, output, session) {
   
   
   output$chiSelect1 <- renderUI({
-    if (input$chitype %in% c("Homogeneity", "Independence", "Permutation")) {
+    if (input$chitype %in% c("Independence", "Permutation")) {
       if (input$chitype == "Permutation") {
         if (!input$chiPermNumber) {
           
@@ -736,58 +750,67 @@ server <- function(input, output, session) {
   })
   
   output$chiSelect2 <- renderUI({
-    if (input$chitype %in% c("Homogeneity", "Independence", "Permutation")) {
+    if (input$chitype %in% c("Independence", "Permutation")) {
       if (input$chitype == "Permutation") {
         if (input$chiPermNumber == FALSE) {
           
         } else {
+          choices = unname(unlist(unique(subset(df, unlist(!is.na(df[, input$chigroupvar])))[,input$chigroupvar])))
           selectInput("chiSamples",
                       HTML("<b>Select Groups to Compare:</b>"),
-                      choices=unique(subset(df, !is.na(df[, input$chigroupvar]))[,input$chigroupvar]),
-                      multiple=TRUE
+                      choices=choices,
+                      multiple=TRUE,
+                      selected=choices[1]
           )
         }
       } else {
+      choices = unname(unlist(unique(subset(df, unlist(!is.na(df[, input$chigroupvar])))[,input$chigroupvar])))
       selectInput("chiSamples",
                   HTML("<b>Select Groups to Compare:</b>"),
-                  choices=unique(subset(df, !is.na(df[, input$chigroupvar]))[,input$chigroupvar]),
-                  multiple=TRUE
-                  )
+                  choices=choices,
+                  multiple=TRUE,
+                  selected=choices[1]
+      )
       }
     }
   })
   
   output$chiTest1 <- renderUI({
     withMathJax(HTML(paste(
-    if ((input$chitype %in% c("Homogeneity", "Independence")) | (input$chitype == "Permutation" & input$chiPermNumber == TRUE)) {
+    if ((input$chitype == "Independence") | (input$chitype == "Permutation" & input$chiPermNumber == TRUE)) {
       paste0("<h2>Hypothesis:</h2> $H_0: p_{ij} = p_{*j} = y_{*j}/n$ i.e. the proportion of counts in each column of the contingency table are equal across rows. $H_1: p_{ij}$ is <b>NOT</b> equal to $p_{*j}$.")
     } else {
       paste0("<h2>Hypothesis:</h2> $H_0:$ the proportions in each category $(p_i)$ are equal. $H_1:$ the proportions in each category $(p_1)$ are <b>NOT</b> equal.")
+    },
+    if (input$chitype == "Uniform Goodness of Fit") {
+      data_table = t(as.data.frame(table(df[, input$chidata])))
+      less_5 = length(data_table[2,as.numeric(data_table[2,])<5])>0
+      if (less_5) {
+        paste0("<h2>Assumptions:</h2> We can assume that the survey had independent observations. By checking the table below, we see that there are cells with a count that is less than 5. Hence, a permutation test is more appropriate here.")
+      } else {
+        paste0("<h2>Assumptions:</h2> We can assume that the survey had independent observations. By checking the table below, we see that each cell has a count that is greater than 5. Hence, both assumptions are satisfied.")
+      }
+    } else if (input$chitype == "Independence") {
+      data_table = t(as.data.frame(table(df[, c(input$chidata, input$chigroupvar)])))
+      less_5 = length(data_table[3,as.numeric(data_table[3,])<5])>0
+      if (less_5) {
+        paste0("<h2>Assumptions:</h2> We can assume that the survey had independent observations. By checking the table below, we see that there are cells with a count that is less than 5. Hence, a permutation test is more appropriate here.")
+      } else {
+        paste0("<h2>Assumptions:</h2> We can assume that the survey had independent observations. By checking the table below, we see that each cell has a count that is greater than 5. Hence, both assumptions are satisfied.")
+      }
+    } else {
+      paste0("<h2>Assumptions:</h2> We can assume that the survey had independent observations.")
     }
       )))
   })
   
-  # output$chiTest2 <- renderUI({
-  #   if ((input$chitype == "Uniform Goodness of Fit") | (input$chitype == "Permutation" & input$chiPermNumber == FALSE)) {
-  #     if (input$chitype == "Permutation" & input$chiPermNumber == TRUE) {
-  #       unique_samples = unique(subset(df, !is.na(df[, input$chiSamples]))[,input$chiSamples])
-  #     } else {
-  #       unique_samples = input$chidata
-  #     }
-  #     unique_data_options = unique(df[!is.na(df[,input$chidata]),input$chidata])
-  #     r = length(unlist(unique_samples))
-  #     c = length(unlist(unique_data_options))
-  #     mat = matrix(data=1/c, r, c)
-  #     rhandsontable(mat, colHeaders = unname(unlist(unique_data_options)), rowHeaders = unname(unlist(unique_samples)))
-  #   }
-  # })
-  
-  output$chiTest2 <- renderUI({
-    withMathJax(HTML(paste(
-      paste0("<h2>Assumptions:</h2>")
-    )))
-    
-  })
+  output$chiTest2 <- DT::renderDataTable(
+    if (input$chitype == "Uniform Goodness of Fit") {
+      t(as.data.frame(table(df[, input$chidata])))
+    } else if (input$chitype == "Independence") {
+      t(as.data.frame(table(df[df[,input$chigroupvar] == input$chiSamples, c(input$chidata, input$chigroupvar)])))
+    }, options = list(scrollX = TRUE)
+  )
   
   output$chiTest3 <- renderUI({
     withMathJax(HTML(paste(
@@ -797,6 +820,7 @@ server <- function(input, output, session) {
     )))
     
   })
+  
   
   
   
