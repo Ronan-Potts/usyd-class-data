@@ -373,7 +373,8 @@ ui <- dashboardPage(title="DATA2X02 Survey Analysis",
                                                                      choices=categorical_vars,
                                                                      selected="steak_preference"),
                                                          uiOutput("chiSelect1"),
-                                                         uiOutput("chiSelect2")
+                                                         uiOutput("chiSelect2"),
+                                                         uiOutput("chiSelect3")
                                                      )
                                               ),
                                               column(width=9,
@@ -750,30 +751,27 @@ server <- function(input, output, session) {
   })
   
   output$chiSelect2 <- renderUI({
-    if (input$chitype %in% c("Independence", "Permutation")) {
-      if (input$chitype == "Permutation") {
-        if (input$chiPermNumber == FALSE) {
-          
-        } else {
-          choices = unname(unlist(unique(subset(df, unlist(!is.na(df[, input$chigroupvar])))[,input$chigroupvar])))
-          selectInput("chiSamples",
-                      HTML("<b>Select Groups to Compare:</b>"),
-                      choices=choices,
-                      multiple=TRUE,
-                      selected=choices[1]
-          )
-        }
-      } else {
+    if ((input$chitype == "Independence") | (input$chitype == "Permutation" & input$chiPermNumber == TRUE)) {
       choices = unname(unlist(unique(subset(df, unlist(!is.na(df[, input$chigroupvar])))[,input$chigroupvar])))
-      selectInput("chiSamples",
-                  HTML("<b>Select Groups to Compare:</b>"),
+      selectInput("chiSample1",
+                  HTML("<b>Select Sample One for Comparison:</b>"),
                   choices=choices,
-                  multiple=TRUE,
                   selected=choices[1]
       )
       }
+  })
+  
+  output$chiSelect3 <- renderUI({
+    if ((input$chitype == "Independence") | (input$chitype == "Permutation" & input$chiPermNumber == TRUE)) {
+      choices = unname(unlist(unique(subset(df, unlist(!is.na(df[, input$chigroupvar])))[,input$chigroupvar])))
+      selectInput("chiSample2",
+                  HTML("<b>Select Sample Two for Comparison:</b>"),
+                  choices=subset(choices, choices != input$chiSample1),
+                  selected=choices[1]
+      )
     }
   })
+  
   
   output$chiTest1 <- renderUI({
     withMathJax(HTML(paste(
@@ -805,20 +803,39 @@ server <- function(input, output, session) {
   })
   
   output$chiTest2 <- DT::renderDataTable(
-    if (input$chitype == "Uniform Goodness of Fit") {
+    if (input$chitype == "Uniform Goodness of Fit" | (input$chitype == "Permutation" & input$chiPermNumber == FALSE)) {
       t(as.data.frame(table(df[, input$chidata])))
-    } else if (input$chitype == "Independence") {
-      t(as.data.frame(table(df[df[,input$chigroupvar] == input$chiSamples, c(input$chidata, input$chigroupvar)])))
+    } else if (input$chitype == "Independence" | (input$chitype == "Permutation" & input$chiPermNumber == TRUE)) {
+      t(as.data.frame(table(df[df[,input$chigroupvar] == c(input$chiSample1, input$chiSample2), c(input$chidata, input$chigroupvar)])))
     }, options = list(scrollX = TRUE)
   )
   
+  
   output$chiTest3 <- renderUI({
+    if (input$chitype == "Uniform Goodness of Fit") {
+      data = as.data.frame(table(df[,input$chidata]))$Freq
+      chisq_test = chisq.test(data)
+    } else if (input$chitype == "Independent") {
+      data1 = as.data.frame(table(df[df[,input$chigroupvar] == input$chiSample1,input$chidata]))$Freq
+      data2 = as.data.frame(table(df[df[,input$chigroupvar] == input$chiSample2,input$chidata]))$Freq
+      chisq_test = chisq.test(data1, data2)
+    } else if (input$chitype == "Permutation" & input$chiPermNumber == FALSE) {
+      data = as.data.frame(table(df[,input$chidata]))$Freq
+      chisq_test = chisq.test(data, simulate.p.value = TRUE, B=input$chiMonteNum)
+    } else {
+      data1 = as.data.frame(table(df[df[,input$chigroupvar] == input$chiSample1,input$chidata]))$Freq
+      data2 = as.data.frame(table(df[df[,input$chigroupvar] == input$chiSample2,input$chidata]))$Freq
+      chisq_test = chisq.test(data1, data2, simulate.p.value = TRUE, B = input$chiMonteNum)
+    }
     withMathJax(HTML(paste(
-      paste0("<h2>Observed Test Statistic:</h2>"),
-      paste0("<h2>p-value:</h2>"),
-      paste0("<h2>Decision:</h2>")
+      paste0("<h2>Observed Test Statistic:</h2> $t_0 = $", signif(chisq_test$statistic,2)),
+      paste0("<h2>p-value:</h2> $p = $", signif(chisq_test$p.value,2)),
+      if (chisq_test$p.value > 0.05) {
+        paste0("<h2>Decision:</h2> Since $p > 0.05$, we cannot reject the null hypothesis and it is possible that the population mean of the DATA2X02 ", input$tdata, " data is equal to ", input$tmu, ". However, keep in mind that neither assumption was satisfied, meaning the t-test is <b>NOT</b> reliable.")
+      } else if (chisq_test$p.value <= 0.05) {
+        paste0("<h2>Decision:</h2> Since $p < 0.05$, we reject the null hypothesis in favour of the alternative hypothesis. However, keep in mind that neither assumption was satisfied, meaning the t-test is <b>NOT</b> reliable.")
+      }
     )))
-    
   })
   
   
